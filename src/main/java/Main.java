@@ -11,7 +11,7 @@ public class Main
     public static void main(String[] args)
     {
         // 欢迎界面
-        System.out.println("##欢迎进入复旦医院管理系统。");
+        System.out.println("##进出校管理系统。");
         system:
         while (true)
         {
@@ -91,11 +91,11 @@ public class Main
             else
             {
                 // 进入用户交互界面
-                System.out.println(String.format("##欢迎，用户%s！", user.getUsername()));
+                System.out.printf("##欢迎，用户%s！%n", user.getUsername());
                 user.routine();
                 
                 // 用户注销
-                System.out.println(String.format("##用户%s成功退出登录。", user.getUsername()));
+                System.out.printf("##用户%s成功退出登录。%n", user.getUsername());
                 user = null;
             }
         }

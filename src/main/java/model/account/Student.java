@@ -20,12 +20,12 @@ public class Student {
     private String home_address;
     private String identity_type;
     private String id_num;
-    private Integer in_school;
+    private String in_school;
     private String class_name;
     private String faculty_name;
 
     public Student(String ID, String name, String phone, String email, String personal_address, String home_address,
-                   String identity_type, String id_num, Integer in_school, String class_name, String faculty_name)
+                   String identity_type, String id_num, String in_school, String class_name, String faculty_name)
     {
         this.ID = ID;
         this.name = name;
@@ -51,7 +51,7 @@ public class Student {
     {
         return this.phone;
     }
-    public Integer getInSchool()
+    public String getInSchool()
     {
         return this.in_school;
     }
@@ -153,7 +153,7 @@ public class Student {
         System.out.println("##个人信息如下");
         System.out.println("##----------");
         System.out.println(String.format("##ID：%s\n姓名：%s\n手机号：%s\n电子邮箱：%s\n宿舍/住址：%s\n" +
-                        "家庭住址：%s\n证件类型：%s\n证件号：%s\n在校状态：%d\n班级：%s\n学院：%s\n",
+                        "家庭住址：%s\n证件类型：%s\n证件号：%s\n在校状态：%s\n班级：%s\n学院：%s\n",
                 this.ID, this.name, this.phone, this.email, this.personal_address, this.home_address,
                 this.identity_type, this.id_num, this.in_school, this.class_name, this.faculty_name));
         System.out.println("##----------");
@@ -208,8 +208,24 @@ public class Student {
 
     private void getMyDailyReport()
     {
-        ArrayList<DailyReport> dailyReports = DailyReportUtil.getMyDailyReport(getID());
-        System.out.println("##过去14天填报记录如下");
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要查询过去几天的填报记录");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<DailyReport> dailyReports = DailyReportUtil.getMyDailyReport(getID(), n);
+        System.out.printf("##过去%d天填报记录如下\n",n);
         if (dailyReports == null){
             System.out.println("##无记录！");
             return;
@@ -222,6 +238,19 @@ public class Student {
         }
         System.out.println("##----------");
     }
+    public static boolean isNumeric(String str)
+    {
+        for (int i = 0; i < str.length(); i++)
+        {
+            //System.out.println(str.charAt(i));
+            if (!Character.isDigit(str.charAt(i)))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
 //    public static Student getInstance(String ID,String name,String phone,String email,String personal_address,String home_address,String identity_type,
 //                                     String id_num,Integer in_school,String class_name,String faculty_name)
 //    {

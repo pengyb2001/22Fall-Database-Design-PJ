@@ -73,7 +73,7 @@ public class AccountUtil
                     String home_address = usersFound.getString("home_address");
                     String identity_type = usersFound.getString("identity_type");
                     String id_num = usersFound.getString("id_num");
-                    Integer in_school = usersFound.getInt("in_school");
+                    String in_school = usersFound.getString("in_school");
                     String class_name = usersFound.getString("class_name");
                     String faculty_name = usersFound.getString("faculty_name");
                     con.close();

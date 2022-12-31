@@ -68,7 +68,7 @@ public class DailyReportUtil {
         }
     }
 
-    public static ArrayList<DailyReport> getMyDailyReport(String id)
+    public static ArrayList<DailyReport> getMyDailyReport(String id, Integer n)
     {
         ArrayList<DailyReport> dailyReports = new ArrayList<>();
         try
@@ -78,9 +78,10 @@ public class DailyReportUtil {
             PreparedStatement findDailyReportById = con.prepareStatement(
                     "select * from daily_report " +
                             "where student_ID=? " +
-                            "and DATE_SUB(CURDATE(), INTERVAL 14 DAY) <= date(timestamp);"
+                            "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp);"
             );
             findDailyReportById.setString(1, id);
+            findDailyReportById.setInt(2, n-1);
             try (ResultSet dailyReportFound = findDailyReportById.executeQuery())
             {
                 while (dailyReportFound.next())

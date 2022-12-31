@@ -90,8 +90,8 @@ public class Student {
             System.out.println("##学生可以进行以下操作：");
             System.out.println("##指令“getInfo”：查看自己的个人信息");
             System.out.println("##指令“getAuthority”：查看自己的入校权限");
-            System.out.println("##指令“list -r”：查看当前区域病房护士负责的患者信息");
-            System.out.println("##指令“list -b”：查看当前区域病床信息");
+            System.out.println("##指令“getDailyReportCount”：查询当日班级填报人数");//TODO
+            System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
             System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
@@ -115,9 +115,9 @@ public class Student {
             {
                 //listR();
             }
-            else if (command.equals("list -b"))
+            else if (command.equals("getMyDailyReport"))
             {
-                //listB();
+                getMyDailyReport();
             }
             else if (command.equals("list -o"))
             {
@@ -204,43 +204,23 @@ public class Student {
             System.out.println("##填写健康日报成功");
 
         }
-//        while(true)
-//        {
-//            if(DailyReportUtil.dailyReportExists(this.ID))
-//            {
-//                System.out.println("##今日已填写过健康日报");
-//                break;
-//            }
-//            else
-//            {
-//                Scanner scanner = new Scanner(System.in);
-//                String student_id = this.ID;
-////                Date timestamp = new Date();
-//                System.out.println("##请输入地点：");
-//                System.out.print(">");
-//                String location = scanner.nextLine();
-//                String healthy;
-//                int is_healthy = -1;
-//                do{
-//                    System.out.println("##请输入健康状况（Y 或 N）：");
-//                    System.out.print(">");
-//                    healthy = scanner.nextLine();
-//                    if(healthy.equals("Y"))
-//                    {
-//                        is_healthy = 1;
-//                    }
-//                    else if(healthy.equals("N"))
-//                    {
-//                        is_healthy = 0;
-//                    }
-//                }while(is_healthy == -1);
-//                DailyReportUtil.addDailyReport(student_id, location, is_healthy);
-//                System.out.println();
-//
-//            }
-//
-//
-//        }
+    }
+
+    private void getMyDailyReport()
+    {
+        ArrayList<DailyReport> dailyReports = DailyReportUtil.getMyDailyReport(getID());
+        System.out.println("##过去14天填报记录如下");
+        if (dailyReports == null){
+            System.out.println("##无记录！");
+            return;
+        }
+        for (DailyReport dailyReport: dailyReports)
+        {
+            System.out.println("##----------");
+            System.out.printf("日期：%s\n地点：%s\n健康状况：%d\n",
+                    dailyReport.getTimestamp().toString(), dailyReport.getLocation(), dailyReport.getIs_healthy());
+        }
+        System.out.println("##----------");
     }
 //    public static Student getInstance(String ID,String name,String phone,String email,String personal_address,String home_address,String identity_type,
 //                                     String id_num,Integer in_school,String class_name,String faculty_name)

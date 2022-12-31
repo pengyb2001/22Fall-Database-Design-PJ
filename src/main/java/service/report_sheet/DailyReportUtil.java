@@ -6,6 +6,7 @@ import service.sql.SQLUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class DailyReportUtil {
@@ -65,6 +66,41 @@ public class DailyReportUtil {
         {
             SQLUtil.handleExceptions(e);
         }
+    }
+
+    public static ArrayList<DailyReport> getMyDailyReport(String id)
+    {
+        ArrayList<DailyReport> dailyReports = new ArrayList<>();
+        try
+        {
+            //System.out.println("Search");
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findDailyReportById = con.prepareStatement(
+                    "select * from daily_report " +
+                            "where student_ID=? " +
+                            "and DATE_SUB(CURDATE(), INTERVAL 14 DAY) <= date(timestamp);"
+            );
+            findDailyReportById.setString(1, id);
+            try (ResultSet dailyReportFound = findDailyReportById.executeQuery())
+            {
+                while (dailyReportFound.next())
+                {
+                    Integer report_num = dailyReportFound.getInt("report_num");
+                    String student_ID = dailyReportFound.getString("student_ID");
+                    Date timestamp = dailyReportFound.getDate("timestamp");
+                    String location = dailyReportFound.getString("location");
+                    Integer is_healthy = dailyReportFound.getInt("is_healthy");
+                    dailyReports.add(new DailyReport(report_num, student_ID, timestamp, location, is_healthy));
+                }
+                con.close();
+                return dailyReports;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
     }
 
 }

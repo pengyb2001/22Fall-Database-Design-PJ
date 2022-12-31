@@ -297,7 +297,8 @@ public class ChiefNurse extends User
             }
             else if (AccountUtil.usernameExists(username))
             {
-                User user = AccountUtil.getUser(username);
+                //User user = AccountUtil.getUser(username);
+                User user = null;
                 if (user != null)
                 {
                     if (user.getArea().equals(getArea()) && user.getType().equals(WardNurse.TYPE) &&

@@ -329,7 +329,8 @@ public class Root extends User
             }
             else if (AccountUtil.usernameExists(username))
             {
-                User user = AccountUtil.getUser(username);
+                //User user = AccountUtil.getUser(username);
+                User user = null;
                 if (user != null)
                 {
                     // 删除数据库中用户信息

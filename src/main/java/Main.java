@@ -1,12 +1,20 @@
+import model.account.FacultyAdmin;
+import model.account.Instructor;
+import model.account.Student;
 import model.user.Root;
-import model.user.User;
+//import model.user.User;
 import service.account.AccountUtil;
 
 import java.util.Scanner;
 
 public class Main
 {
-    private static User user;
+    //private static User user;
+    private static Student student;
+    private static Instructor instructor;
+    private static FacultyAdmin facultyAdmin;
+
+    static int len;
     
     public static void main(String[] args)
     {
@@ -16,7 +24,7 @@ public class Main
         while (true)
         {
             // 用户登录界面，如果用户已登录则允许进行权限操作。
-            if (user == null)
+            if ((student == null)&&(instructor == null)&&(facultyAdmin == null))
             {
                 login:
                 while (true)
@@ -45,7 +53,7 @@ public class Main
                             else if (password.equals(Root.PASSWORD))
                             {
                                 System.out.println("##【root账户登录】登录成功！");
-                                user = new Root();
+                                //user = new Root();
                                 break login;
                             }
                             else
@@ -57,29 +65,14 @@ public class Main
                     else if (AccountUtil.usernameExists(username))
                     {
                         // 普通账户登录
-                        while (true)
-                        {
-                            System.out.println("##请输入密码，或输入“cancel”取消登录：");
-                            System.out.print(">");
-                            String password = scanner.nextLine();
-                            if (password.equals("cancel"))
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                user = AccountUtil.getUser(username, password);
-                                if (user == null)
-                                {
-                                    System.out.println("##密码错误，请重试。");
-                                }
-                                else
-                                {
-                                    System.out.println("##登录成功！");
-                                    break login;
-                                }
-                            }
+                        len = username.length();
+                        switch (len) {
+                            case 4 -> {facultyAdmin = AccountUtil.getFacultyAdministrator(username);}
+                            case 5 -> {instructor = AccountUtil.getInstructor(username);}
+                            case 11 -> {student = AccountUtil.getStudent(username);}
                         }
+                        System.out.println("##登录成功！");
+                        break login;
                     }
                     else
                     {
@@ -90,13 +83,25 @@ public class Main
             }
             else
             {
+                flag:
                 // 进入用户交互界面
-                System.out.printf("##欢迎，用户%s！%n", user.getUsername());
-                user.routine();
-                
-                // 用户注销
-                System.out.printf("##用户%s成功退出登录。%n", user.getUsername());
-                user = null;
+                switch (len) {
+                    case 4 -> {System.out.printf("##欢迎，用户%s！%n", facultyAdmin.getName());
+                        //facultyAdmin.routine();
+                        // 用户注销
+                        System.out.printf("##用户%s成功退出登录。%n", facultyAdmin.getName());
+                        facultyAdmin = null;}
+                    case 5 -> {System.out.printf("##欢迎，用户%s！%n", instructor.getName());
+                        //instructor.routine();
+                        // 用户注销
+                        System.out.printf("##用户%s成功退出登录。%n", instructor.getName());
+                        instructor = null;}
+                    case 11 -> {System.out.printf("##欢迎，用户%s！%n", student.getName());
+                        student.routine();
+                        // 用户注销
+                        System.out.printf("##用户%s成功退出登录。%n", student.getName());
+                        student = null;}
+                }
             }
         }
     }

@@ -6,6 +6,7 @@ import model.user.User;
 import service.authority.AuthorityUtil;
 import service.id.IDGenerator;
 import service.report_sheet.DailyReportUtil;
+import service.report_sheet.LeaveApprovalUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,6 +95,7 @@ public class Student {
             System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
             System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
+            System.out.println("##指令“addLeaveApproval”：新增离校申请");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
             System.out.println("##指令“logout”：注销");
             System.out.println("##指令“exit”：退出系统");
@@ -127,6 +129,10 @@ public class Student {
             {
                 //add();
                 addDailyReport();
+            }
+            else if (command.equals("addLeaveApproval"))
+            {
+                addLeaveApproval();
             }
             else if (command.equals("delete"))
             {
@@ -203,6 +209,43 @@ public class Student {
             DailyReportUtil.addDailyReport(student_id, location, is_healthy);
             System.out.println("##填写健康日报成功");
 
+        }
+    }
+
+    private void addLeaveApproval()
+    {
+        if(LeaveApprovalUtil.leaveApprovalExists(this.ID))
+        {
+            System.out.println("##还有未处理完的离校申请");
+        }
+        else
+        {
+            Scanner scanner = new Scanner(System.in);
+            String student_id = this.ID;
+            System.out.println("##请输入离校原因：");
+            System.out.print(">");
+            String reason = scanner.nextLine();
+            System.out.println("##请输入目的地：");
+            System.out.print(">");
+            String destination = scanner.nextLine();
+            int compare = 0;
+            String leave_date;
+            String entry_date;
+            do
+            {
+                //TODO 日期正则匹配
+                System.out.println("##请输入预计离校日期（形如yyyy-MM-dd）：");
+                System.out.print(">");
+                leave_date = scanner.nextLine();
+                System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
+                System.out.print(">");
+                entry_date = scanner.nextLine();
+                compare = entry_date.compareTo(leave_date);
+                if(compare <= 0) System.out.println("##进校日期应该晚于离校日期，请重新填写");
+            }while(compare <= 0);
+
+            LeaveApprovalUtil.addLeaveApproval(student_id, reason, destination, leave_date, entry_date);
+            System.out.println("##填写离校申请成功");
         }
     }
 

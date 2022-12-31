@@ -10,9 +10,9 @@ import java.util.ArrayList;
 
 public class AuthorityUtil {
     //根据学生ID返回能有权限进入的校区列表
-    public static ArrayList<AdmissionAuthority> getAuthorityByID(String ID)
+    public static ArrayList<String> getAuthorityByID(String ID)
     {
-        ArrayList<AdmissionAuthority> authorities = new ArrayList<>();
+        ArrayList<String> authorities = new ArrayList<>();
 
         try
         {
@@ -23,10 +23,10 @@ public class AuthorityUtil {
             {
                 while (authoritiesFound.next())
                 {
-                    String student_ID = authoritiesFound.getString("student_ID");
+                    //String student_ID = authoritiesFound.getString("student_ID");
                     String campus_name = authoritiesFound.getString("campus_name");
-                    AdmissionAuthority admissionAuthority = new AdmissionAuthority(student_ID, campus_name);
-                    authorities.add(admissionAuthority);
+                    //AdmissionAuthority admissionAuthority = new AdmissionAuthority(student_ID, campus_name);
+                    authorities.add(campus_name);
                 }
             }
 

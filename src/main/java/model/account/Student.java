@@ -6,7 +6,12 @@ import model.user.User;
 import service.authority.AuthorityUtil;
 import service.id.IDGenerator;
 import service.report_sheet.DailyReportUtil;
+import service.sql.SQLUtil;
+import service.record.RecordUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -93,6 +98,7 @@ public class Student {
             System.out.println("##指令“getDailyReportCount”：查询当日班级填报人数");//TODO
             System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
             System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
+            System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
             System.out.println("##指令“logout”：注销");
@@ -122,6 +128,11 @@ public class Student {
             else if (command.equals("list -o"))
             {
                 //listO();
+            }
+            else if (command.equals("passGate"))
+            {
+                //add();
+                passGate();
             }
             else if (command.equals("addDailyReport"))
             {
@@ -161,12 +172,12 @@ public class Student {
 
     private void getAuthority()
     {
-        ArrayList<AdmissionAuthority> authorities = AuthorityUtil.getAuthorityByID(getID());
+        ArrayList<String> authorities = AuthorityUtil.getAuthorityByID(getID());
         System.out.println("##可进校区如下");
         System.out.println("##----------");
-        for (AdmissionAuthority authority: authorities)
+        for (String authority: authorities)
         {
-            System.out.println(String.format("%s", authority.getCampus_name()));
+            System.out.println(String.format("%s", authority));
         }
         System.out.println("##----------");
     }
@@ -249,6 +260,82 @@ public class Student {
             }
         }
         return true;
+    }
+
+    private void passGate()
+    {
+        if (getInSchool().equals("不在校"))
+        {
+            Scanner scanner = new Scanner(System.in);
+            String input;
+            boolean invalid = true;
+            do{
+                System.out.println("##请问要进入哪个校区？(H校区/J校区/F校区/Z校区)");
+                System.out.print(">");
+                input = scanner.nextLine();
+                switch (input)
+                {
+                    case "H校区":
+                    case "J校区":
+                    case "F校区":
+                    case "Z校区":
+                        ArrayList<String> campuses = AuthorityUtil.getAuthorityByID(getID());
+                        if (campuses.contains(input))
+                        {
+                            this.in_school = input;
+                            updateInfo(this);
+                            RecordUtil.addNewPassRecord(getID(),input,1);
+                            System.out.printf("##进入%s成功\n",input);
+                            invalid = false;
+                            break;
+                        }
+                        else
+                        {
+                            System.out.printf("##您没有进入%s的权限，请填写入校申请！\n",input);
+                            invalid = false;
+                            break;
+                        }
+                    default:
+                        System.out.println("##请输入正确的校区名！");
+                }
+            }while(invalid);
+        }
+        else//如果学生已经在校
+        {
+            String in_school = this.in_school;
+            this.in_school = "不在校";
+            updateInfo(this);
+            RecordUtil.addNewPassRecord(getID(),in_school,0);
+            System.out.printf("##离开%s成功\n",in_school);
+        }
+    }
+
+    public void updateInfo(Student student)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement updateInfoByID = con.prepareStatement("update student set " +
+                    "name = ?,phone = ?,email = ?,personal_address = ?,home_address = ?,identity_type = ?," +
+                    "id_num = ?,in_school = ?,class_name = ?,faculty_name = ? where ID=?");
+            updateInfoByID.setString(11, ID);
+            updateInfoByID.setString(1, student.name);
+            updateInfoByID.setString(2, student.phone);
+            updateInfoByID.setString(3, student.email);
+            updateInfoByID.setString(4, student.personal_address);
+            updateInfoByID.setString(5, student.home_address);
+            updateInfoByID.setString(6, student.identity_type);
+            updateInfoByID.setString(7, student.id_num);
+            updateInfoByID.setString(8, student.in_school);
+            updateInfoByID.setString(9, student.class_name);
+            updateInfoByID.setString(10, student.faculty_name);
+            updateInfoByID.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
     }
 
 //    public static Student getInstance(String ID,String name,String phone,String email,String personal_address,String home_address,String identity_type,

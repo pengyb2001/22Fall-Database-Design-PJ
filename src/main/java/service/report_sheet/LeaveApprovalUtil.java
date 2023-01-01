@@ -1,6 +1,7 @@
 package service.report_sheet;
 
 import model.account.Student;
+import model.report_sheet.EnterApproval;
 import model.report_sheet.LeaveApproval;
 import service.sql.SQLUtil;
 
@@ -194,7 +195,7 @@ public class LeaveApprovalUtil {
                 findLeaveApprovalByClassFacultyandStatus = con.prepareStatement(
                         "select * from leave_approval, student " +
                                 "where student_ID=ID " +
-                                "and faculty_name = ? and status=0 or status=1 or status=2;"
+                                "and faculty_name = ? and (status=0 or status=1 or status=2);"
                 );
                 findLeaveApprovalByClassFacultyandStatus.setString(1, faculty_name);
             }
@@ -269,4 +270,6 @@ public class LeaveApprovalUtil {
             SQLUtil.handleExceptions(e);
         }
     }
+
+
 }

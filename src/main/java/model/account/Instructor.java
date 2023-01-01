@@ -7,6 +7,8 @@ import model.account.Student;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import static service.report_sheet.LeaveApprovalUtil.dateChange;
+
 public class Instructor {
     private String ID;
     private String name;
@@ -115,22 +117,55 @@ public class Instructor {
 
     public void getMyLeaveApprovals()
     {
+        int status = 0;
+        boolean invalid = true;
+        String input;
+        Scanner scanner = new Scanner(System.in);
+        do{
+            System.out.println("##输入查询条件(待审批/已同意/已拒绝)：");
+            System.out.print(">");
+            input = scanner.nextLine();
+            switch (input)
+            {
+                case "待审批":
+                    invalid = false;
+                    status = 0;
+                    break;
+                case "已同意":
+                    invalid = false;
+                    status = 2;
+                    break;
+                case "已拒绝":
+                    invalid = false;
+                    status = 1;
+                    break;
+                default:
+                    System.out.println("##请输入正确的指令！");
+            }
+        }while(invalid);
         ArrayList<LeaveApproval> leaveApprovals = new ArrayList<>();
-        leaveApprovals = LeaveApprovalUtil.getLeaveApprovals(getClassName(),getFacultyName(),0);
+        leaveApprovals = LeaveApprovalUtil.getLeaveApprovals(getClassName(),getFacultyName(),status);
         if (leaveApprovals.isEmpty())
         {
-            System.out.println("##无待审批的离校申请！");
+            System.out.printf("##无%s的离校申请！\n",input);
         }
         else
         {
-            System.out.println("##待审批的离校申请如下：");
-            System.out.println("##要进行审批，请记下对应学号");
+            System.out.printf("##%s的离校申请如下：",input);
+
             for (LeaveApproval leaveApproval: leaveApprovals)
             {
+                String sta = switch (leaveApproval.getStatus()) {
+                    case 0 -> "待辅导员审核";
+                    case 1 -> "待学生修改";
+                    case 2 -> "待院系管理员审核";
+                    case 3 -> "已结束";
+                    default -> "未知错误";
+                };
                 System.out.println("##----------");
-                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n目的地：%s\n离校日期：%s\n返校日期：%s\n",
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n目的地：%s\n离校日期：%s\n返校日期：%s\n状态：%s\n拒绝理由：%s\n",
                         leaveApproval.getForm_num(), leaveApproval.getStudent_ID(), leaveApproval.getTimestamp().toString(), leaveApproval.getReason(),
-                        leaveApproval.getDestination(), leaveApproval.getLeave_date().toString(), leaveApproval.getEntry_date().toString());
+                        leaveApproval.getDestination(), leaveApproval.getLeave_date().toString(), leaveApproval.getEntry_date().toString(), sta, leaveApproval.getRefuse_reason());
             }
             System.out.println("##----------");
         }

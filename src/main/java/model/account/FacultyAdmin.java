@@ -1,7 +1,9 @@
 package model.account;
 
+import model.report_sheet.EnterApproval;
 import model.report_sheet.LeaveApproval;
 import service.authority.AuthorityUtil;
+import service.report_sheet.EnterApprovalUtil;
 import service.report_sheet.LeaveApprovalUtil;
 
 import java.util.ArrayList;
@@ -61,19 +63,19 @@ public class FacultyAdmin {
             String command = scanner.nextLine();
             if (command.equals("getMyLeaveApprovals"))
             {
-//                System.out.println("##指请输入用于筛选的状态\n待审批请输入2 已同意请输入3 已拒绝请输入1");
-//                System.out.print(">");
-//                Scanner scan = new Scanner(System.in);
-//                String sta = scan.nextLine();
                 getMyLeaveApprovals();
             }
             else if (command.equals("editLeaveApproval"))
             {
                 editLeaveApproval();
             }
-            else if (command.equals("list -r"))
+            else if (command.equals("getMyEnterApprovals"))
             {
-                //listR();
+                getMyEnterApprovals();
+            }
+            else if (command.equals("editEnterApproval"))
+            {
+//                editEnterApproval();
             }
             else if (command.equals("getMyDailyReport"))
             {
@@ -239,6 +241,62 @@ public class FacultyAdmin {
         }else
         {
             System.out.println("该学生没有待审批的离校申请！");
+        }
+    }
+
+    public void getMyEnterApprovals()
+    {
+        int status = 4;
+        boolean invalid = true;
+        String input;
+        Scanner scanner = new Scanner(System.in);
+        do{
+            System.out.println("##输入查询条件(待审批/已同意/已拒绝)：");
+            System.out.print(">");
+            input = scanner.nextLine();
+            switch (input)
+            {
+                case "待审批":
+                    invalid = false;
+                    status = 2;
+                    break;
+                case "已同意":
+                    invalid = false;
+                    status = 3;
+                    break;
+                case "已拒绝":
+                    invalid = false;
+                    status = 1;
+                    break;
+                default:
+                    System.out.println("##请输入正确的指令！");
+            }
+        }while(invalid);
+        ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
+        enterApprovals = EnterApprovalUtil.getEnterApprovals(getFacultyName(),status);
+        if (enterApprovals.isEmpty())
+        {
+            System.out.printf("##无%s的入校申请！\n",input);
+        }
+        else
+        {
+            System.out.printf("##%s的入校申请如下：",input);
+
+            for (EnterApproval enterApproval: enterApprovals)
+            {
+                String sta = switch (enterApproval.getStatus()) {
+                    case 0 -> "待辅导员审核";
+                    case 1 -> "待学生修改";
+                    case 2 -> "待院系管理员审核";
+                    case 3 -> "已结束";
+                    default -> "未知错误";
+                };
+                System.out.println("##----------");
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n状态：%s\n拒绝理由：%s\n",
+                        enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
+                        enterApproval.getLived_area(), enterApproval.getEntry_date().toString(), sta, enterApproval.getRefuse_reason());
+            }
+            System.out.println("##----------");
         }
     }
 }

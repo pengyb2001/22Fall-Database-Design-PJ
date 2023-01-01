@@ -92,7 +92,7 @@ public class Main
                         System.out.printf("##用户%s成功退出登录。%n", facultyAdmin.getName());
                         facultyAdmin = null;}
                     case 5 -> {System.out.printf("##欢迎，用户%s！%n", instructor.getName());
-                        //instructor.routine();
+                        instructor.routine();
                         // 用户注销
                         System.out.printf("##用户%s成功退出登录。%n", instructor.getName());
                         instructor = null;}

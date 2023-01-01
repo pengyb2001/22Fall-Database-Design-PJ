@@ -1,6 +1,7 @@
 package service.report_sheet;
 
 import model.report_sheet.EnterApproval;
+import model.report_sheet.LeaveApproval;
 import service.sql.SQLUtil;
 
 import java.sql.Connection;
@@ -146,5 +147,49 @@ public class EnterApprovalUtil {
             SQLUtil.handleExceptions(e);
         }
         return null;
+    }
+
+    //变更入校申请
+    public static void updateEnterApproval(EnterApproval enterApproval)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement updateEnterApprovalByFormNum = con.prepareStatement("update enter_approval set " +
+                    "student_ID = ?,timestamp = ?,reason = ?,lived_area = ?,entry_date = ?," +
+                    "status = ?,refuse_reason = ? where form_num = ?");
+            updateEnterApprovalByFormNum.setInt(8, enterApproval.getForm_num());
+            updateEnterApprovalByFormNum.setString(1, enterApproval.getStudent_ID());
+            updateEnterApprovalByFormNum.setDate(2, (java.sql.Date) enterApproval.getTimestamp());
+            updateEnterApprovalByFormNum.setString(3, enterApproval.getReason());
+            updateEnterApprovalByFormNum.setString(4, enterApproval.getLived_area());
+            updateEnterApprovalByFormNum.setDate(5, (java.sql.Date) enterApproval.getEntry_date());
+            updateEnterApprovalByFormNum.setInt(6, enterApproval.getStatus());
+            updateEnterApprovalByFormNum.setString(7, enterApproval.getRefuse_reason());
+            updateEnterApprovalByFormNum.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+    }
+
+    //撤销离校申请
+    public static void deleteEnterApproval(Integer form_num)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement deleteEnterApprovalByFormNum = con.prepareStatement("delete from enter_approval " +
+                    "where form_num = ?");
+            deleteEnterApprovalByFormNum.setInt(1, form_num);
+            deleteEnterApprovalByFormNum.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
     }
 }

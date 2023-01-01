@@ -1,5 +1,6 @@
 package service.report_sheet;
 
+import model.account.Student;
 import model.report_sheet.LeaveApproval;
 import service.sql.SQLUtil;
 
@@ -167,5 +168,31 @@ public class LeaveApprovalUtil {
             SQLUtil.handleExceptions(e);
         }
         return null;
+    }
+    //变更离校申请
+    public static void updateLeaveApproval(LeaveApproval leaveApproval)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement updateLeaveApprovalByFormNum = con.prepareStatement("update leave_approval set " +
+                    "student_ID = ?,timestamp = ?,reason = ?,destination = ?,leave_date = ?,entry_date = ?," +
+                    "status = ?,refuse_reason = ? where form_num = ?");
+            updateLeaveApprovalByFormNum.setInt(9, leaveApproval.getForm_num());
+            updateLeaveApprovalByFormNum.setString(1, leaveApproval.getStudent_ID());
+            updateLeaveApprovalByFormNum.setDate(2, (java.sql.Date) leaveApproval.getTimestamp());
+            updateLeaveApprovalByFormNum.setString(3, leaveApproval.getReason());
+            updateLeaveApprovalByFormNum.setString(4, leaveApproval.getDestination());
+            updateLeaveApprovalByFormNum.setDate(5, (java.sql.Date) leaveApproval.getLeave_date());
+            updateLeaveApprovalByFormNum.setDate(6, (java.sql.Date) leaveApproval.getEntry_date());
+            updateLeaveApprovalByFormNum.setInt(7, leaveApproval.getStatus());
+            updateLeaveApprovalByFormNum.setString(8, leaveApproval.getRefuse_reason());
+            updateLeaveApprovalByFormNum.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
     }
 }

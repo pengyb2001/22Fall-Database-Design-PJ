@@ -638,10 +638,15 @@ public class Student {
                                 System.out.print(">");
                                 entry_date = scanner.nextLine();
                                 if(!match(entry_date)) {
-                                    System.out.println("##进校日期格式有误");//TODO 入校日期应该晚于当日
+                                    System.out.println("##进校日期格式有误");
                                     continue;
                                 }
-                            }while(!match(entry_date));
+                                Date d = new Date();
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                                String dateNowStr = sdf.format(d);
+                                compare = entry_date.compareTo(dateNowStr);
+                                if(compare <= 0) System.out.println("##进校日期应该晚于今天，请重新填写");
+                            }while((compare <= 0) || (!match(entry_date)));
                             //把时间类型转换为sql Date
                             enterApproval.setEntry_date(new java.sql.Date(dateChange(entry_date).getTime()));
                             enterApproval.setStatus(0);

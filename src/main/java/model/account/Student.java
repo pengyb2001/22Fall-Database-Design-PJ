@@ -502,7 +502,7 @@ public class Student {
                 String input;
                 Scanner scanner = new Scanner(System.in);
                 do{
-                    System.out.println("##输入edit进行修改\n##输入end结束申请\n##输入quit退回上一层");
+                    System.out.println("##输入edit进行修改\n##输入end撤销申请\n##输入quit退回上一层");
                     System.out.print(">");
                     input = scanner.nextLine();
                     switch (input)
@@ -546,8 +546,7 @@ public class Student {
                             break;
                         case "end":
                             invalid = false;
-                            leaveApproval.setStatus(3);
-                            LeaveApprovalUtil.updateLeaveApproval(leaveApproval);
+                            LeaveApprovalUtil.deleteLeaveApproval(leaveApproval.getForm_num());
                             System.out.println("##撤销表单成功！");
                             break;
                         case "quit":

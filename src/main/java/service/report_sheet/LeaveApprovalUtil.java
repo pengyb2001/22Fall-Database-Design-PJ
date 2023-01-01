@@ -198,4 +198,22 @@ public class LeaveApprovalUtil {
             SQLUtil.handleExceptions(e);
         }
     }
+
+    //撤销离校申请
+    public static void deleteLeaveApproval(Integer form_num)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement deleteLeaveApprovalByFormNum = con.prepareStatement("delete from leave_approval " +
+                    "where form_num = ?");
+            deleteLeaveApprovalByFormNum.setInt(1, form_num);
+            deleteLeaveApprovalByFormNum.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+    }
 }

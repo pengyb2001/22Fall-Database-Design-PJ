@@ -28,7 +28,8 @@ public class LeaveApprovalUtil {
                 findLeaveApprovalByIdandStatus = con.prepareStatement(
                         "select * from leave_approval " +
                                 "where student_ID=? " +
-                                "and status=?;"
+                                "and status=? " +
+                                "order by form_num DESC;"
                 );
                 findLeaveApprovalByIdandStatus.setString(1, id);
                 findLeaveApprovalByIdandStatus.setInt(2, sta);
@@ -38,7 +39,8 @@ public class LeaveApprovalUtil {
                 findLeaveApprovalByIdandStatus = con.prepareStatement(
                         "select * from leave_approval " +
                                 "where student_ID=? " +
-                                "and status=0 or status=1 or status=2;"
+                                "and status=0 or status=1 or status=2 " +
+                                "order by form_num DESC;"
                 );
                 findLeaveApprovalByIdandStatus.setString(1, id);
             }

@@ -2,6 +2,7 @@ package model.account;
 
 import model.admission_authority.AdmissionAuthority;
 import model.report_sheet.DailyReport;
+import model.report_sheet.LeaveApproval;
 import model.user.User;
 import service.authority.AuthorityUtil;
 import service.id.IDGenerator;
@@ -16,6 +17,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+
+import static service.report_sheet.LeaveApprovalUtil.dateChange;
 
 public class Student {
     private String ID;
@@ -98,7 +101,7 @@ public class Student {
             System.out.println("##指令“getAuthority”：查看自己的入校权限");
             System.out.println("##指令“getDailyReportCount”：查询当日班级填报人数");//TODO
             System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
-            System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
+            System.out.println("##指令“getMyLeaveApproval”：查询当前离校审批进度");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
@@ -127,9 +130,9 @@ public class Student {
             {
                 getMyDailyReport();
             }
-            else if (command.equals("list -o"))
+            else if (command.equals("getMyLeaveApproval"))
             {
-                //listO();
+                getMyLeaveApproval();
             }
             else if (command.equals("passGate"))
             {
@@ -352,7 +355,7 @@ public class Student {
             System.out.printf("##离开%s成功\n",in_school);
         }
     }
-
+    //更新个人信息（id不变）
     public void updateInfo(Student student)
     {
         try
@@ -378,6 +381,103 @@ public class Student {
         catch (Exception e)
         {
             SQLUtil.handleExceptions(e);
+        }
+    }
+    //查询自己离校审批进度
+    private void getMyLeaveApproval()
+    {
+        LeaveApproval leaveApproval = LeaveApprovalUtil.getLeaveApproval(getID(),4);//状态0,1,2
+        if (leaveApproval == null)
+        {
+            leaveApproval = LeaveApprovalUtil.getLeaveApproval(getID(),3);
+            if (leaveApproval == null)
+            {
+                System.out.println("当前没有离校申请！");
+                return;
+            }else
+            {
+                String status = switch (leaveApproval.getStatus()) {
+                    case 0 -> "待辅导员审核";
+                    case 1 -> "待学生修改";
+                    case 2 -> "待院系管理员审核";
+                    case 3 -> "已结束";
+                    default -> "未知错误";
+                };
+                System.out.println("##----------");
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n目的地：%s\n离校日期：%s\n返校日期：%s\n状态：%s\n拒绝理由：%s\n",
+                        leaveApproval.getForm_num(), leaveApproval.getStudent_ID(), leaveApproval.getTimestamp().toString(), leaveApproval.getReason(),
+                        leaveApproval.getDestination(), leaveApproval.getLeave_date().toString(), leaveApproval.getEntry_date().toString(), status, leaveApproval.getRefuse_reason());
+                System.out.println("##----------");
+            }
+        }else
+        {
+            String status = switch (leaveApproval.getStatus()) {
+                case 0 -> "待辅导员审核";
+                case 1 -> "待学生修改";
+                case 2 -> "待院系管理员审核";
+                case 3 -> "已结束";
+                default -> "未知错误";
+            };
+            System.out.println("##----------");
+            System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n目的地：%s\n离校日期：%s\n返校日期：%s\n状态：%s\n拒绝理由：%s\n",
+                    leaveApproval.getForm_num(), leaveApproval.getStudent_ID(), leaveApproval.getTimestamp().toString(), leaveApproval.getReason(),
+                    leaveApproval.getDestination(), leaveApproval.getLeave_date().toString(), leaveApproval.getEntry_date().toString(), status, leaveApproval.getRefuse_reason());
+            System.out.println("##----------");
+            if ((leaveApproval.getStatus() == 0)||(leaveApproval.getStatus() == 1))
+            {
+                boolean invalid = true;
+                String input;
+                Scanner scanner = new Scanner(System.in);
+                do{
+                    System.out.println("##输入edit进行修改\n##输入end结束申请\n##输入quit退回上一层");
+                    System.out.print(">");
+                    input = scanner.nextLine();
+                    switch (input)
+                    {
+                        case "edit":
+                            invalid = false;
+                            System.out.println("##请输入离校原因：");
+                            System.out.print(">");
+                            leaveApproval.setReason(scanner.nextLine());
+                            System.out.println("##请输入目的地：");
+                            System.out.print(">");
+                            leaveApproval.setDestination(scanner.nextLine());
+                            int compare = 0;
+                            String leave_date;
+                            String entry_date;
+                            do
+                            {
+                                //TODO 日期正则匹配
+                                System.out.println("##请输入预计离校日期（形如yyyy-MM-dd）：");
+                                System.out.print(">");
+                                leave_date = scanner.nextLine();
+                                System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
+                                System.out.print(">");
+                                entry_date = scanner.nextLine();
+                                compare = entry_date.compareTo(leave_date);
+                                if(compare <= 0) System.out.println("##进校日期应该晚于离校日期，请重新填写");
+                            }while(compare <= 0);
+                            //把时间类型转换为sql Date
+                            leaveApproval.setLeave_date(new java.sql.Date(dateChange(leave_date).getTime()));
+                            leaveApproval.setEntry_date(new java.sql.Date(dateChange(entry_date).getTime()));
+                            leaveApproval.setStatus(0);
+                            LeaveApprovalUtil.updateLeaveApproval(leaveApproval);
+                            System.out.println("##修改离校申请成功");
+                            break;
+                        case "end":
+                            invalid = false;
+                            leaveApproval.setStatus(3);
+                            LeaveApprovalUtil.updateLeaveApproval(leaveApproval);
+                            System.out.println("##撤销表单成功！");
+                            break;
+                        case "quit":
+                            invalid = false;
+                            break;
+                        default:
+                            System.out.println("##请输入正确的指令！");
+                    }
+                }while(invalid);
+            }
         }
     }
 

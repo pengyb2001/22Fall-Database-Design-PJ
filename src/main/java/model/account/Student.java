@@ -2,6 +2,7 @@ package model.account;
 
 import model.admission_authority.AdmissionAuthority;
 import model.report_sheet.DailyReport;
+import model.report_sheet.EnterApproval;
 import model.report_sheet.LeaveApproval;
 import model.user.User;
 import service.authority.AuthorityUtil;
@@ -119,6 +120,7 @@ public class Student {
             System.out.println("##指令“getDailyReportCount”：查询当日班级填报人数");//TODO
             System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
             System.out.println("##指令“getMyLeaveApproval”：查询当前离校审批进度");
+            System.out.println("##指令“getMyEnterApproval”：查询当前入校审批进度");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
@@ -151,6 +153,10 @@ public class Student {
             else if (command.equals("getMyLeaveApproval"))
             {
                 getMyLeaveApproval();
+            }
+            else if (command.equals("getMyEnterApproval"))
+            {
+                getMyEnterApproval();
             }
             else if (command.equals("passGate"))
             {
@@ -528,7 +534,7 @@ public class Student {
                                 System.out.print(">");
                                 leave_date = scanner.nextLine();
                                 if(!match(leave_date)) {
-                                    System.out.println("##离校日期格式有误");
+                                    System.out.println("##离校日期格式有误");//TODO 离校日期应该晚于当日
                                     continue;
                                 }
                                 System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
@@ -551,6 +557,100 @@ public class Student {
                         case "end":
                             invalid = false;
                             LeaveApprovalUtil.deleteLeaveApproval(leaveApproval.getForm_num());
+                            System.out.println("##撤销表单成功！");
+                            break;
+                        case "quit":
+                            invalid = false;
+                            break;
+                        default:
+                            System.out.println("##请输入正确的指令！");
+                    }
+                }while(invalid);
+            }
+        }
+    }
+
+    //查询自己入校审批进度
+    private void getMyEnterApproval()
+    {
+        EnterApproval enterApproval = EnterApprovalUtil.getEnterApproval(getID(),4);//状态0,1,2
+        if (enterApproval == null)
+        {
+
+            enterApproval = EnterApprovalUtil.getEnterApproval(getID(),3);
+            if (enterApproval == null)
+            {
+                System.out.println("当前没有入校申请！");
+                return;
+            }else
+            {
+                String status = switch (enterApproval.getStatus()) {
+                    case 0 -> "待辅导员审核";
+                    case 1 -> "待学生修改";
+                    case 2 -> "待院系管理员审核";
+                    case 3 -> "已结束";
+                    default -> "未知错误";
+                };
+                System.out.println("##----------");
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n状态：%s\n拒绝理由：%s\n",
+                        enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
+                        enterApproval.getLived_area(), enterApproval.getEntry_date().toString(), status, enterApproval.getRefuse_reason());
+                System.out.println("##----------");
+            }
+        }else
+        {
+            String status = switch (enterApproval.getStatus()) {
+                case 0 -> "待辅导员审核";
+                case 1 -> "待学生修改";
+                case 2 -> "待院系管理员审核";
+                case 3 -> "已结束";
+                default -> "未知错误";
+            };
+            System.out.println("##----------");
+            System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n状态：%s\n拒绝理由：%s\n",
+                    enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
+                    enterApproval.getLived_area(), enterApproval.getEntry_date().toString(), status, enterApproval.getRefuse_reason());
+            System.out.println("##----------");
+            if ((enterApproval.getStatus() == 0)||(enterApproval.getStatus() == 1))
+            {
+                boolean invalid = true;
+                String input;
+                Scanner scanner = new Scanner(System.in);
+                do{
+                    System.out.println("##输入edit进行修改\n##输入end撤销申请\n##输入quit退回上一层");
+                    System.out.print(">");
+                    input = scanner.nextLine();
+                    switch (input)
+                    {
+                        case "edit":
+                            invalid = false;
+                            System.out.println("##请输入入校原因：");
+                            System.out.print(">");
+                            enterApproval.setReason(scanner.nextLine());
+                            System.out.println("##请输入七天内经过地区：");
+                            System.out.print(">");
+                            enterApproval.setLived_area(scanner.nextLine());
+                            int compare = 0;
+                            String entry_date = "0";
+                            do
+                            {
+                                System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
+                                System.out.print(">");
+                                entry_date = scanner.nextLine();
+                                if(!match(entry_date)) {
+                                    System.out.println("##进校日期格式有误");//TODO 入校日期应该晚于当日
+                                    continue;
+                                }
+                            }while(!match(entry_date));
+                            //把时间类型转换为sql Date
+                            enterApproval.setEntry_date(new java.sql.Date(dateChange(entry_date).getTime()));
+                            enterApproval.setStatus(0);
+                            EnterApprovalUtil.updateEnterApproval(enterApproval);
+                            System.out.println("##修改入校申请成功");
+                            break;
+                        case "end":
+                            invalid = false;
+                            EnterApprovalUtil.deleteEnterApproval(enterApproval.getForm_num());
                             System.out.println("##撤销表单成功！");
                             break;
                         case "quit":

@@ -383,6 +383,7 @@ public class Instructor {
                 if (input.equals("Y"))
                 {
                     enterApproval.setStatus(2);
+                    enterApproval.setRefuse_reason(null);
                     EnterApprovalUtil.updateEnterApproval(enterApproval);
                     System.out.println("##已通过审批！");
                     break;

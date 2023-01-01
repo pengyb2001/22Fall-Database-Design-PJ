@@ -256,7 +256,11 @@ public class Student {
 
     private void addLeaveApproval()
     {
-        if(LeaveApprovalUtil.leaveApprovalExists(this.ID))
+        if(AuthorityUtil.getAuthorityByID(getID()).isEmpty())
+        {
+            System.out.println("##您没有入校权限，无需申请离校");
+        }
+        else if(LeaveApprovalUtil.leaveApprovalExists(this.ID))
         {
             System.out.println("##还有未处理完的离校申请");
         }

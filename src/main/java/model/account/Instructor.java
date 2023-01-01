@@ -242,6 +242,7 @@ public class Instructor {
                 if (input.equals("Y"))
                 {
                     leaveApproval.setStatus(2);
+                    leaveApproval.setRefuse_reason(null);
                     LeaveApprovalUtil.updateLeaveApproval(leaveApproval);
                     System.out.println("##已通过审批！");
                     break;

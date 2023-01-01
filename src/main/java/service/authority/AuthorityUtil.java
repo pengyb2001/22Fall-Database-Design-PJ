@@ -39,4 +39,20 @@ public class AuthorityUtil {
 
         return authorities;
     }
+
+    public static void deleteAuthorityByID(String ID)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement deleteAuthorityByID = con.prepareStatement("delete from admission_authority where student_ID=?");
+            deleteAuthorityByID.setString(1, ID);
+            deleteAuthorityByID.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+    }
 }

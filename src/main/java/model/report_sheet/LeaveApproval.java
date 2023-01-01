@@ -59,6 +59,35 @@ public class LeaveApproval {
     {
         return this.status;
     }
+    public String getRefuse_reason()
+    {
+        return this.refuse_reason;
+    }
+    public void setStatus(Integer new_status)
+    {
+        this.status = new_status;
+    }
+    public void setReason(String new_reason)
+    {
+        this.reason = new_reason;
+    }
+    public void setDestination(String destination)
+    {
+        this.destination = destination;
+    }
+    public void setLeave_date(java.sql.Date date)
+    {
+        this.leave_date = date;
+    }
+    public void setEntry_date(java.sql.Date date)
+    {
+        this.entry_date = date;
+    }
+    public void setRefuse_reason(String refuse_reason)
+    {
+        this.refuse_reason = refuse_reason;
+    }
+
 
 
 }

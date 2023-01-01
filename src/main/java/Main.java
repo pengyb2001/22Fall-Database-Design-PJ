@@ -86,20 +86,20 @@ public class Main
                 flag:
                 // 进入用户交互界面
                 switch (len) {
-                    case 4 -> {System.out.printf("##欢迎，用户%s！%n", facultyAdmin.getName());
-                        //facultyAdmin.routine();
+                    case 4 -> {System.out.printf("##欢迎，院系管理员%s！%n", facultyAdmin.getName());
+                        facultyAdmin.routine();
                         // 用户注销
-                        System.out.printf("##用户%s成功退出登录。%n", facultyAdmin.getName());
+                        System.out.printf("##院系管理员%s成功退出登录。%n", facultyAdmin.getName());
                         facultyAdmin = null;}
-                    case 5 -> {System.out.printf("##欢迎，用户%s！%n", instructor.getName());
+                    case 5 -> {System.out.printf("##欢迎，辅导员%s！%n", instructor.getName());
                         instructor.routine();
                         // 用户注销
-                        System.out.printf("##用户%s成功退出登录。%n", instructor.getName());
+                        System.out.printf("##辅导员%s成功退出登录。%n", instructor.getName());
                         instructor = null;}
-                    case 11 -> {System.out.printf("##欢迎，用户%s！%n", student.getName());
+                    case 11 -> {System.out.printf("##欢迎，学生%s！%n", student.getName());
                         student.routine();
                         // 用户注销
-                        System.out.printf("##用户%s成功退出登录。%n", student.getName());
+                        System.out.printf("##学生%s成功退出登录。%n", student.getName());
                         student = null;}
                 }
             }

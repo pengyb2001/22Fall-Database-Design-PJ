@@ -149,6 +149,57 @@ public class EnterApprovalUtil {
         return null;
     }
 
+    //根据院系和审批状态查找入校申请
+    public static ArrayList<EnterApproval> getEnterApprovals(String faculty_name, Integer sta) {
+        ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findEnterApprovalByClassFacultyandStatus;
+            if(sta != 4){
+                findEnterApprovalByClassFacultyandStatus = con.prepareStatement(
+                        "select * from enter_approval, student " +
+                                "where student_ID=ID " +
+                                "and faculty_name = ? and status = ?;"
+                );
+                findEnterApprovalByClassFacultyandStatus.setString(1, faculty_name);
+                findEnterApprovalByClassFacultyandStatus.setInt(2, sta);
+            }
+            else
+            {
+                findEnterApprovalByClassFacultyandStatus = con.prepareStatement(
+                        "select * from enter_approval, student " +
+                                "where student_ID=ID " +
+                                "and faculty_name = ? and (status=0 or status=1 or status=2);"
+                );
+                findEnterApprovalByClassFacultyandStatus.setString(1, faculty_name);
+            }
+            try (ResultSet enterApprovalFound = findEnterApprovalByClassFacultyandStatus.executeQuery())
+            {
+                while (enterApprovalFound.next())
+                {
+                    Integer form_num = enterApprovalFound.getInt("form_num");
+                    String student_ID = enterApprovalFound.getString("student_ID");
+                    Date timestamp = enterApprovalFound.getDate("timestamp");
+                    String reason = enterApprovalFound.getString("reason");
+                    String lived_area = enterApprovalFound.getString("lived_area");
+                    Date entry_date = enterApprovalFound.getDate("entry_date");
+                    Integer status = enterApprovalFound.getInt("status");
+                    String refuse_reason = enterApprovalFound.getString("refuse_reason");
+                    enterApprovals.add(new EnterApproval(form_num, student_ID, timestamp, reason, lived_area, entry_date,
+                            status, refuse_reason));
+                }
+                con.close();
+                return enterApprovals;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
     //变更入校申请
     public static void updateEnterApproval(EnterApproval enterApproval)
     {

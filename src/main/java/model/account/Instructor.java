@@ -1,6 +1,7 @@
 package model.account;
 import model.report_sheet.DailyReport;
 import model.report_sheet.EnterApproval;
+import service.account.AccountUtil;
 import service.report_sheet.EnterApprovalUtil;
 import service.report_sheet.LeaveApprovalUtil;
 import model.report_sheet.LeaveApproval;
@@ -49,6 +50,7 @@ public class Instructor {
         {
             System.out.println("##==========");
             System.out.println("##辅导员可以进行以下操作：");
+            System.out.println("##指令“getClassList”：查询班级名单");
             System.out.println("##指令“getMyLeaveApprovals”：查询离校申请");
             System.out.println("##指令“editLeaveApproval”：审批离校申请");
             System.out.println("##指令“getMyEnterApprovals”：查询入校申请");
@@ -66,7 +68,11 @@ public class Instructor {
             System.out.print(">");
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
-            if (command.equals("getMyLeaveApprovals"))
+            if (command.equals("getClassList"))
+            {
+                getClassList();
+            }
+            else if (command.equals("getMyLeaveApprovals"))
             {
                 getMyLeaveApprovals();
             }
@@ -125,6 +131,21 @@ public class Instructor {
                 System.out.println("##无此指令，请重新输入。");
             }
         }
+    }
+
+    public void getClassList()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.getClassList(getClassName(), getFacultyName());
+        System.out.println("##学生名单如下：");
+
+        for (Student student: students)
+        {
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n",
+                    student.getID(), student.getName());
+        }
+        System.out.println("##----------");
     }
 
     public void getMyLeaveApprovals()

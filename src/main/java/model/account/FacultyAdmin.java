@@ -48,7 +48,8 @@ public class FacultyAdmin {
             System.out.println("##院系管理员可以进行以下操作：");
             System.out.println("##指令“getMyLeaveApprovals”：按状态查看本院系的离校申请");
             System.out.println("##指令“editLeaveApproval”：审批本院系离校申请");
-
+            System.out.println("##指令“getMyEnterApprovals”：按状态查询本院系入校申请");
+            System.out.println("##指令“editEnterApproval”：审批本院系入校申请");
             System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
             System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
             System.out.println("##指令“passGate”：进出校");

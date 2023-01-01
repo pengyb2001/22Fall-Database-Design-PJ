@@ -1,6 +1,5 @@
 import model.account.FacultyAdmin;
 import model.account.Instructor;
-import model.account.Root;
 import model.account.Student;
 import model.account.Root;
 //import model.user.User;
@@ -14,6 +13,7 @@ public class Main
     private static Student student;
     private static Instructor instructor;
     private static FacultyAdmin facultyAdmin;
+    private static Root root;
 
     static int len;
     
@@ -25,7 +25,7 @@ public class Main
         while (true)
         {
             // 用户登录界面，如果用户已登录则允许进行权限操作。
-            if ((student == null)&&(instructor == null)&&(facultyAdmin == null))
+            if ((student == null)&&(instructor == null)&&(facultyAdmin == null)&&(root == null))
             {
                 login:
                 while (true)
@@ -39,30 +39,31 @@ public class Main
                     {
                         break system;
                     }
-//                    else if (username.equals(Root.USERNAME))
-//                    {
-//                        // root账户登录
-//                        while (true)
-//                        {
-//                            System.out.println("##【root账户登录】请输入密码，或输入“cancel”取消登录：");
-//                            System.out.print(">");
-//                            String password = scanner.nextLine();
-//                            if (password.equals("cancel"))
-//                            {
-//                                break;
-//                            }
-//                            else if (password.equals(Root.PASSWORD))
-//                            {
-//                                System.out.println("##【root账户登录】登录成功！");
-//                                //user = new Root();
-//                                break login;
-//                            }
-//                            else
-//                            {
-//                                System.out.println("##【root账户登录】密码错误，请重试。");
-//                            }
-//                        }
-//                    }
+                    else if (username.equals(Root.USERNAME))
+                    {
+                        // root账户登录
+                        while (true)
+                        {
+                            System.out.println("##【root账户登录】请输入密码，或输入“cancel”取消登录：");
+                            System.out.print(">");
+                            String password = scanner.nextLine();
+                            if (password.equals("cancel"))
+                            {
+                                break;
+                            }
+                            else if (password.equals(Root.PASSWORD))
+                            {
+                                System.out.println("##【root账户登录】登录成功！");
+                                root = new Root();
+                                len = 999;
+                                break login;
+                            }
+                            else
+                            {
+                                System.out.println("##【root账户登录】密码错误，请重试。");
+                            }
+                        }
+                    }
                     else if (AccountUtil.usernameExists(username))
                     {
                         // 普通账户登录
@@ -84,7 +85,6 @@ public class Main
             }
             else
             {
-                flag:
                 // 进入用户交互界面
                 switch (len) {
                     case 4 -> {System.out.printf("##欢迎，院系管理员%s！%n", facultyAdmin.getName());
@@ -102,6 +102,11 @@ public class Main
                         // 用户注销
                         System.out.printf("##学生%s成功退出登录。%n", student.getName());
                         student = null;}
+                    case 999 -> {System.out.printf("##欢迎，超级管理员%s！%n", root.getName());
+                        root.routine();
+                        // 用户注销
+                        System.out.printf("##超级管理员%s成功退出登录。%n", root.getName());
+                        root = null;}
                 }
             }
         }

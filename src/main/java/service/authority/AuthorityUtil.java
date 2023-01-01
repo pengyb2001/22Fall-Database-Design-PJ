@@ -76,4 +76,25 @@ public class AuthorityUtil {
             SQLUtil.handleExceptions(e);
         }
     }
+    //按校区删除所有学生进入的权限（在校除外）
+    public static void deleteAuthorityByCampusName(String campus_name)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement deleteAuthorityByCampusName = con.prepareStatement("delete from admission_authority " +
+                    "where campus_name = ? " +
+                    "and student_ID not in " +
+                    "(select a.student_ID " +
+                    "from (select a.student_ID from admission_authority a left join student on a.student_ID=student.ID where student.in_school = ?)a)");
+            deleteAuthorityByCampusName.setString(1, campus_name);
+            deleteAuthorityByCampusName.setString(2, campus_name);
+            deleteAuthorityByCampusName.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+    }
 }

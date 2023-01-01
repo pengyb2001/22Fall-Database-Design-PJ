@@ -20,6 +20,7 @@ public class LeaveApprovalUtil {
 
     //根据学生ID和审批状态查找离校申请
     public static LeaveApproval getLeaveApproval(String id, Integer sta) {
+//        System.out.println("传进来的id为："+ id);//debug
         try
         {
             Connection con = SQLUtil.getConnection();
@@ -39,7 +40,7 @@ public class LeaveApprovalUtil {
                 findLeaveApprovalByIdandStatus = con.prepareStatement(
                         "select * from leave_approval " +
                                 "where student_ID=? " +
-                                "and status=0 or status=1 or status=2 " +
+                                "and (status=0 or status=1 or status=2) " +
                                 "order by form_num DESC;"
                 );
                 findLeaveApprovalByIdandStatus.setString(1, id);
@@ -48,6 +49,7 @@ public class LeaveApprovalUtil {
             {
                 if(leaveApprovalFound.next())
                 {
+//                    System.out.println(leaveApprovalFound.getString("student_ID"));//debug
                     Integer form_num = leaveApprovalFound.getInt("form_num");
                     String student_ID = leaveApprovalFound.getString("student_ID");
                     Date timestamp = leaveApprovalFound.getDate("timestamp");
@@ -81,7 +83,6 @@ public class LeaveApprovalUtil {
             dd =new Date(cDate.getTime());
 
         } catch (ParseException e) {
-        // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return dd;

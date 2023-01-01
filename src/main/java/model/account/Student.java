@@ -7,6 +7,7 @@ import model.user.User;
 import service.authority.AuthorityUtil;
 import service.id.IDGenerator;
 import service.report_sheet.DailyReportUtil;
+import service.report_sheet.EnterApprovalUtil;
 import service.report_sheet.LeaveApprovalUtil;
 import service.sql.SQLUtil;
 import service.record.RecordUtil;
@@ -14,9 +15,13 @@ import service.record.RecordUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static service.report_sheet.LeaveApprovalUtil.dateChange;
 
@@ -73,6 +78,18 @@ public class Student {
         return this.faculty_name;
     }
 
+    public static boolean match(String input) {
+        // 验证日期格式为YYYY-MM-DD的正则表达式为
+        String regex = "(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})" +
+                "-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|" +
+                "(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|" +
+                "[2468][048]|[3579][26])00))-02-29)(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|" +
+                "[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|" +
+                "(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|" +
+                "[3579][26])00))-02-29) ";
+        boolean flag = input.matches(regex);
+        return flag;
+    }
     /**
      *1.查询：
      * 	学生：
@@ -105,6 +122,7 @@ public class Student {
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
+            System.out.println("##指令“addEnterApproval”：新增入校申请");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
             System.out.println("##指令“logout”：注销");
             System.out.println("##指令“exit”：退出系统");
@@ -147,6 +165,10 @@ public class Student {
             else if (command.equals("addLeaveApproval"))
             {
                 addLeaveApproval();
+            }
+            else if (command.equals("addEnterApproval"))
+            {
+                addEnterApproval();
             }
             else if (command.equals("delete"))
             {
@@ -243,26 +265,76 @@ public class Student {
             System.out.print(">");
             String destination = scanner.nextLine();
             int compare = 0;
-            String leave_date;
-            String entry_date;
+            String leave_date = "0";
+            String entry_date = "0";
             do
             {
-                //TODO 日期正则匹配
                 System.out.println("##请输入预计离校日期（形如yyyy-MM-dd）：");
                 System.out.print(">");
                 leave_date = scanner.nextLine();
+                if(!match(leave_date)) {
+                    System.out.println("##离校日期格式有误");
+                    continue;
+                }
                 System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
                 System.out.print(">");
                 entry_date = scanner.nextLine();
+                if(!match(entry_date)) {
+                    System.out.println("##进校日期格式有误");
+                    continue;
+                }
                 compare = entry_date.compareTo(leave_date);
                 if(compare <= 0) System.out.println("##进校日期应该晚于离校日期，请重新填写");
-            }while(compare <= 0);
+            }while((compare <= 0) || (!match(leave_date)) || (!match(entry_date)));
 
             LeaveApprovalUtil.addLeaveApproval(student_id, reason, destination, leave_date, entry_date);
             System.out.println("##填写离校申请成功");
         }
     }
 
+    public void addEnterApproval()
+    {
+        //只有当没有任何入校权限时才能申请入校
+        if(!AuthorityUtil.getAuthorityByID(getID()).isEmpty())
+        {
+            System.out.println("##您拥有入校权限，无需申请");
+        }
+        else if(EnterApprovalUtil.enterApprovalExists(this.ID))
+        {
+            System.out.println("##还有未处理完的入校申请");
+        }
+        else
+        {
+            Scanner scanner = new Scanner(System.in);
+            String student_id = this.ID;
+            System.out.println("##请输入入校原因：");
+            System.out.print(">");
+            String reason = scanner.nextLine();
+            System.out.println("##请输入七天内经过地区：");
+            System.out.print(">");
+            String lived_area = scanner.nextLine();
+            int compare = 0;
+            String entry_date = "0";
+            do
+            {
+                System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
+                System.out.print(">");
+                entry_date = scanner.nextLine();
+                if(!match(entry_date)) {
+                    System.out.println("##进校日期格式有误");
+                    continue;
+                }
+                Date d = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String dateNowStr = sdf.format(d);
+                compare = entry_date.compareTo(dateNowStr);
+                if(compare <= 0) System.out.println("##进校日期应该晚于今天，请重新填写");
+            }while((compare <= 0) || (!match(entry_date)));
+
+            EnterApprovalUtil.addEnterApproval(student_id, reason, lived_area, entry_date);
+            System.out.println("##填写入校申请成功");
+        }
+    }
     private void getMyDailyReport()
     {
         Scanner scanner = new Scanner(System.in);
@@ -389,6 +461,7 @@ public class Student {
         LeaveApproval leaveApproval = LeaveApprovalUtil.getLeaveApproval(getID(),4);//状态0,1,2
         if (leaveApproval == null)
         {
+
             leaveApproval = LeaveApprovalUtil.getLeaveApproval(getID(),3);
             if (leaveApproval == null)
             {
@@ -443,20 +516,27 @@ public class Student {
                             System.out.print(">");
                             leaveApproval.setDestination(scanner.nextLine());
                             int compare = 0;
-                            String leave_date;
-                            String entry_date;
+                            String leave_date = "0";
+                            String entry_date = "0";
                             do
                             {
-                                //TODO 日期正则匹配
                                 System.out.println("##请输入预计离校日期（形如yyyy-MM-dd）：");
                                 System.out.print(">");
                                 leave_date = scanner.nextLine();
+                                if(!match(leave_date)) {
+                                    System.out.println("##离校日期格式有误");
+                                    continue;
+                                }
                                 System.out.println("##请输入预计进校日期（形如yyyy-MM-dd）：");
                                 System.out.print(">");
                                 entry_date = scanner.nextLine();
+                                if(!match(entry_date)) {
+                                    System.out.println("##进校日期格式有误");
+                                    continue;
+                                }
                                 compare = entry_date.compareTo(leave_date);
                                 if(compare <= 0) System.out.println("##进校日期应该晚于离校日期，请重新填写");
-                            }while(compare <= 0);
+                            }while((compare <= 0) || (!match(leave_date)) || (!match(entry_date)));
                             //把时间类型转换为sql Date
                             leaveApproval.setLeave_date(new java.sql.Date(dateChange(leave_date).getTime()));
                             leaveApproval.setEntry_date(new java.sql.Date(dateChange(entry_date).getTime()));

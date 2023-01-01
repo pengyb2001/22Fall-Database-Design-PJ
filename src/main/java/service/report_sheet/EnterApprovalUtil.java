@@ -150,7 +150,7 @@ public class EnterApprovalUtil {
     }
 
     //根据院系和审批状态查找入校申请
-    public static ArrayList<EnterApproval> getEnterApprovals(String faculty_name, Integer sta) {
+    public static ArrayList<EnterApproval> getEnterApprovals_1(String faculty_name, Integer sta) {
         ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
         try
         {

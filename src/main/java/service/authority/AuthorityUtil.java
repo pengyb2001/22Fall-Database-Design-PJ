@@ -55,4 +55,25 @@ public class AuthorityUtil {
             SQLUtil.handleExceptions(e);
         }
     }
+
+    public static void addAuthorityByID(String ID)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement addAuthorityByID = con.prepareStatement("insert into admission_authority(student_ID, campus_name) " +
+                    "values " +
+                    "(?, 'H校区'), (?, 'J校区'), (?,'F校区'), (?, 'Z校区');");
+            addAuthorityByID.setString(1, ID);
+            addAuthorityByID.setString(2, ID);
+            addAuthorityByID.setString(3, ID);
+            addAuthorityByID.setString(4, ID);
+            addAuthorityByID.executeUpdate();
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+    }
 }

@@ -76,7 +76,7 @@ public class FacultyAdmin {
             }
             else if (command.equals("editEnterApproval"))
             {
-//                editEnterApproval();
+                editEnterApproval();
             }
             else if (command.equals("getMyDailyReport"))
             {
@@ -247,7 +247,7 @@ public class FacultyAdmin {
 
     public void getMyEnterApprovals()
     {
-        int status = 4;
+        Integer status = 4;
         boolean invalid = true;
         String input;
         Scanner scanner = new Scanner(System.in);
@@ -274,7 +274,7 @@ public class FacultyAdmin {
             }
         }while(invalid);
         ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
-        enterApprovals = EnterApprovalUtil.getEnterApprovals(getFacultyName(),status);
+        enterApprovals = EnterApprovalUtil.getEnterApprovals_1(getFacultyName(),status);
         if (enterApprovals.isEmpty())
         {
             System.out.printf("##无%s的入校申请！\n",input);
@@ -298,6 +298,92 @@ public class FacultyAdmin {
                         enterApproval.getLived_area(), enterApproval.getEntry_date().toString(), sta, enterApproval.getRefuse_reason());
             }
             System.out.println("##----------");
+        }
+    }
+
+    public void editEnterApproval()
+    {
+        ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
+        enterApprovals = EnterApprovalUtil.getEnterApprovals_1(getFacultyName(),2);
+        if (enterApprovals.isEmpty())
+        {
+            System.out.println("##无待审批的入校申请！");
+            return;
+        }
+        else
+        {
+            System.out.println("##待审批的离校申请如下：");
+            System.out.println("##要进行审批，请记下对应学号");
+            for (EnterApproval enterApproval: enterApprovals)
+            {
+                System.out.println("##----------");
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n",
+                        enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
+                        enterApproval.getLived_area(), enterApproval.getEntry_date().toString());
+            }
+            System.out.println("##----------");
+        }
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要审批的学生学号");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = 1;
+            }
+            else
+            {
+                System.out.println("##请输入正确的学号！");
+            }
+        }while(n == 0);
+        ArrayList<String> ids = new ArrayList<>();
+        for (EnterApproval enterApproval: enterApprovals)
+        {
+            ids.add(enterApproval.getStudent_ID());
+        }
+        if (ids.contains(input))
+        {
+            EnterApproval enterApproval = EnterApprovalUtil.getEnterApproval(input, 2);
+            assert enterApproval != null;
+            System.out.println("##----------");
+            System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n",
+                    enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
+                    enterApproval.getLived_area(), enterApproval.getEntry_date().toString());
+            System.out.println("##----------");
+            do {
+                System.out.println("##通过或拒绝(Y/N)：");
+                System.out.print(">");
+                input = scanner.nextLine();
+                if (input.equals("Y"))
+                {
+                    enterApproval.setStatus(3);
+                    EnterApprovalUtil.updateEnterApproval(enterApproval);
+                    System.out.println("##已通过审批！");
+                    AuthorityUtil.addAuthorityByID(enterApproval.getStudent_ID());
+                    System.out.println("##已开通该学生所有入校权限！");
+                    break;
+                } else if (input.equals("N"))
+                {
+                    enterApproval.setStatus(1);
+                    System.out.println("##请输入拒绝原因：");
+                    System.out.print(">");
+                    input = scanner.nextLine();
+                    enterApproval.setRefuse_reason(input);
+                    EnterApprovalUtil.updateEnterApproval(enterApproval);
+                    System.out.println("##已拒绝申请！");
+                    break;
+                } else
+                {
+                    System.out.println("请输入正确的指令！");
+                }
+            }while (true);
+
+        }else
+        {
+            System.out.println("该学生没有待审批的入校申请！");
         }
     }
 }

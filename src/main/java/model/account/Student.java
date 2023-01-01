@@ -4,7 +4,7 @@ import model.admission_authority.AdmissionAuthority;
 import model.report_sheet.DailyReport;
 import model.report_sheet.EnterApproval;
 import model.report_sheet.LeaveApproval;
-import model.user.User;
+import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
 import service.id.IDGenerator;
 import service.report_sheet.DailyReportUtil;
@@ -117,15 +117,14 @@ public class Student {
             System.out.println("##学生可以进行以下操作：");
             System.out.println("##指令“getInfo”：查看自己的个人信息");
             System.out.println("##指令“getAuthority”：查看自己的入校权限");
-            System.out.println("##指令“getDailyReportCount”：查询当日班级填报人数");//TODO
-            System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
+            System.out.println("##指令“getDailyReportCount”：查询当日班级健康日报填报人数");//TODO
+            System.out.println("##指令“getMyDailyReport”：查看过去n天日报");
             System.out.println("##指令“getMyLeaveApproval”：查询当前离校审批进度");
             System.out.println("##指令“getMyEnterApproval”：查询当前入校审批进度");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
             System.out.println("##指令“addEnterApproval”：新增入校申请");
-            System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
             System.out.println("##指令“logout”：注销");
             System.out.println("##指令“exit”：退出系统");
             System.out.println("##==========");
@@ -139,12 +138,11 @@ public class Student {
             }
             else if (command.equals("getAuthority"))
             {
-                //listP();
                 getAuthority();
             }
-            else if (command.equals("list -r"))
+            else if (command.equals("getDailyReportCount"))
             {
-                //listR();
+                getDailyReportCount();
             }
             else if (command.equals("getMyDailyReport"))
             {
@@ -216,6 +214,18 @@ public class Student {
         {
             System.out.println(String.format("%s", authority));
         }
+        System.out.println("##----------");
+    }
+
+    private void getDailyReportCount()
+    {
+        int cnt = 0;
+        int total = 0;
+        total = AccountUtil.getCountByClass(getClassName(), getFacultyName());
+        System.out.println("##----------");
+        System.out.printf("##本班人数为：%d\n",total);
+        cnt = DailyReportUtil.getTodayCountByClass(getClassName(), getFacultyName());
+        System.out.printf("##本班今天填写了健康日报的人数为：%d\n",cnt);
         System.out.println("##----------");
     }
 

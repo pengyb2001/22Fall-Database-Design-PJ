@@ -2,6 +2,7 @@ package model.account;
 
 import model.report_sheet.EnterApproval;
 import model.report_sheet.LeaveApproval;
+import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
 import service.report_sheet.EnterApprovalUtil;
 import service.report_sheet.LeaveApprovalUtil;
@@ -46,6 +47,7 @@ public class FacultyAdmin {
         {
             System.out.println("##==========");
             System.out.println("##院系管理员可以进行以下操作：");
+            System.out.println("##指令“getFacultyList”：查询院系名单");
             System.out.println("##指令“getMyLeaveApprovals”：按状态查看本院系的离校申请");
             System.out.println("##指令“editLeaveApproval”：审批本院系离校申请");
             System.out.println("##指令“getMyEnterApprovals”：按状态查询本院系入校申请");
@@ -62,7 +64,11 @@ public class FacultyAdmin {
             System.out.print(">");
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
-            if (command.equals("getMyLeaveApprovals"))
+            if (command.equals("getFacultyList"))
+            {
+                getFacultyList();
+            }
+            else if (command.equals("getMyLeaveApprovals"))
             {
                 getMyLeaveApprovals();
             }
@@ -100,6 +106,21 @@ public class FacultyAdmin {
                 System.out.println("##无此指令，请重新输入。");
             }
         }
+    }
+
+    public void getFacultyList()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.getFacultyList(getFacultyName());
+        System.out.println("##学生名单如下：");
+
+        for (Student student: students)
+        {
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n",
+                    student.getID(), student.getName());
+        }
+        System.out.println("##----------");
     }
 
     public void getMyLeaveApprovals()

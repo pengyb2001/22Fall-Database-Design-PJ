@@ -1,7 +1,8 @@
 import model.account.FacultyAdmin;
 import model.account.Instructor;
+import model.account.Root;
 import model.account.Student;
-import model.user.Root;
+import model.account.Root;
 //import model.user.User;
 import service.account.AccountUtil;
 
@@ -38,30 +39,30 @@ public class Main
                     {
                         break system;
                     }
-                    else if (username.equals(Root.USERNAME))
-                    {
-                        // root账户登录
-                        while (true)
-                        {
-                            System.out.println("##【root账户登录】请输入密码，或输入“cancel”取消登录：");
-                            System.out.print(">");
-                            String password = scanner.nextLine();
-                            if (password.equals("cancel"))
-                            {
-                                break;
-                            }
-                            else if (password.equals(Root.PASSWORD))
-                            {
-                                System.out.println("##【root账户登录】登录成功！");
-                                //user = new Root();
-                                break login;
-                            }
-                            else
-                            {
-                                System.out.println("##【root账户登录】密码错误，请重试。");
-                            }
-                        }
-                    }
+//                    else if (username.equals(Root.USERNAME))
+//                    {
+//                        // root账户登录
+//                        while (true)
+//                        {
+//                            System.out.println("##【root账户登录】请输入密码，或输入“cancel”取消登录：");
+//                            System.out.print(">");
+//                            String password = scanner.nextLine();
+//                            if (password.equals("cancel"))
+//                            {
+//                                break;
+//                            }
+//                            else if (password.equals(Root.PASSWORD))
+//                            {
+//                                System.out.println("##【root账户登录】登录成功！");
+//                                //user = new Root();
+//                                break login;
+//                            }
+//                            else
+//                            {
+//                                System.out.println("##【root账户登录】密码错误，请重试。");
+//                            }
+//                        }
+//                    }
                     else if (AccountUtil.usernameExists(username))
                     {
                         // 普通账户登录

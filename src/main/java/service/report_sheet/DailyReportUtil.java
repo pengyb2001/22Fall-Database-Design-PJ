@@ -47,6 +47,30 @@ public class DailyReportUtil {
         return null;
     }
 
+    public static int getTodayCountByClass(String classname, String facultyname)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement getTodayCountByClass = con.prepareStatement("select count(*) " +
+                    "from student join daily_report on student.ID=daily_report.student_ID " +
+                    "where class_name=? and faculty_name=? and to_days(timestamp) = to_days(now())");
+            getTodayCountByClass.setString(1, classname);
+            getTodayCountByClass.setString(2, facultyname);
+            ResultSet count = getTodayCountByClass.executeQuery();
+            int num = 0;
+            while (count.next()){
+                num = count.getInt(1);
+            }
+            return num;
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return 0;
+    }
+
     public static void addDailyReport(String student_ID, String location, Integer is_healthy)
     {
         try
@@ -56,7 +80,6 @@ public class DailyReportUtil {
             PreparedStatement addNewDailyReport = con.prepareStatement("insert into daily_report(student_ID, timestamp, location, is_healthy)" +
                     "values (?, now(), ?, ?)" );
             addNewDailyReport.setString(1, student_ID);
-//            addNewDailyReport.setDate(2, (java.sql.Date) timestamp);
             addNewDailyReport.setString(2, location);
             addNewDailyReport.setInt(3, is_healthy);
             addNewDailyReport.executeUpdate();

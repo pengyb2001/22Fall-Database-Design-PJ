@@ -13,7 +13,7 @@ public class SQLUtil
 {
     private static final String URL = "jdbc:mysql://localhost:3306/admission_authority_management?serverTimezone=Asia/Shanghai&useSSL=false&autoReconnect=true";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "Pyb/1106";
+    private static final String PASSWORD = "skybase911";
     
     public static Connection getConnection() throws ClassNotFoundException, SQLException
     {

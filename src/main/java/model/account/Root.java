@@ -1,5 +1,6 @@
 package model.account;
 
+import model.record.PassRecord;
 import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
 import service.record.RecordUtil;
@@ -30,6 +31,7 @@ public class Root {
             System.out.println("##【root账户权限操作】指令“list”：列出所有用户（不包括root）");
             System.out.println("##【root账户权限操作】指令“getStudentsByCampusName”：根据校区查询所有具有该权限的学生数量和名单");
             System.out.println("##【root账户权限操作】指令“manageAdmission”：按校区更改所有学生进入的权限(在该校区除外)");
+            System.out.println("##【root账户权限操作】指令“getOutSchoolStudents”：查询全校已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
             System.out.println("##【root账户权限操作】指令“getInSchoolLeaveStudents”：查询全校已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##【root账户权限操作】指令“getCampusMaxVisit”：过去n天每个院系学生产生最多出入校记录的校区");
             System.out.println("##【root账户权限操作】指令“getInSchoolStudent”：查询过去n天一直在校未曾出校的学生支持按多级范围（全校、院系、班级）");
@@ -50,6 +52,10 @@ public class Root {
             else if (command.equals("manageAdmission"))
             {
                 manageAdmission();
+            }
+            else if (command.equals("getOutSchoolStudents"))
+            {
+                getOutSchoolStudents();
             }
             else if (command.equals("getInSchoolLeaveStudents"))
             {
@@ -169,6 +175,35 @@ public class Root {
                     System.out.println("##请输入正确的校区名！");
             }
         }while(invalid);
+    }
+
+    //getOutSchoolStudents查询全校已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)
+    public void getOutSchoolStudents()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.outSchoolInAuthorityStudents();
+        if (students.isEmpty())
+        {
+            System.out.println("没有具有进校权限但不在校的学生！");
+            return;
+        }
+        System.out.printf("##共%d名学生，学生名单如下：\n",students.size());
+        for (Student student: students)
+        {
+            PassRecord passRecord = RecordUtil.getNearestOutPassRecordByID(student.getID());
+            System.out.println("##----------");
+            if (passRecord == null)
+            {
+                System.out.printf("学号：%s\n姓名：%s\n离校时间：无，可能是尚未报道的新生\n班级：%s\n院系：%s\n",
+                        student.getID(), student.getName(), student.getClassName(), student.getFacultyName());
+            }
+            else
+            {
+                System.out.printf("学号：%s\n姓名：%s\n离校时间：%s\n班级：%s\n院系：%s\n",
+                        student.getID(), student.getName(), passRecord.getTimestamp().toString(), student.getClassName(), student.getFacultyName());
+            }
+        }
+        System.out.println("##----------");
     }
 
     public void getInSchoolLeaveStudents()

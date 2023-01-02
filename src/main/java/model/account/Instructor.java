@@ -559,8 +559,16 @@ public class Instructor {
         {
             PassRecord passRecord = RecordUtil.getNearestOutPassRecordByID(student.getID());
             System.out.println("##----------");
-            System.out.printf("学号：%s\n姓名：%s\n离校时间：%s\n",
-                    student.getID(), student.getName(), passRecord.getTimestamp().toString());
+            if (passRecord == null)
+            {
+                System.out.printf("学号：%s\n姓名：%s\n离校时间：无，可能是尚未报道的新生\n",
+                        student.getID(), student.getName());
+            }
+            else
+            {
+                System.out.printf("学号：%s\n姓名：%s\n离校时间：%s\n",
+                        student.getID(), student.getName(), passRecord.getTimestamp().toString());
+            }
         }
         System.out.println("##----------");
     }

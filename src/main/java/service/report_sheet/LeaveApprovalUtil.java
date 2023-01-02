@@ -142,10 +142,68 @@ public class LeaveApprovalUtil {
                 findLeaveApprovalByClassFacultyandStatus = con.prepareStatement(
                         "select * from leave_approval, student " +
                                 "where student_ID=ID " +
-                                "and class_name = ? and faculty_name = ? and status=0 or status=1 or status=2;"
+                                "and class_name = ? and faculty_name = ? and (status=0 or status=1 or status=2);"
                 );
                 findLeaveApprovalByClassFacultyandStatus.setString(1, class_name);
                 findLeaveApprovalByClassFacultyandStatus.setString(2, faculty_name);
+            }
+            try (ResultSet leaveApprovalFound = findLeaveApprovalByClassFacultyandStatus.executeQuery())
+            {
+                while (leaveApprovalFound.next())
+                {
+                    Integer form_num = leaveApprovalFound.getInt("form_num");
+                    String student_ID = leaveApprovalFound.getString("student_ID");
+                    Date timestamp = leaveApprovalFound.getDate("timestamp");
+                    String reason = leaveApprovalFound.getString("reason");
+                    String destination = leaveApprovalFound.getString("destination");
+                    Date leave_date = leaveApprovalFound.getDate("leave_date");
+                    Date entry_date = leaveApprovalFound.getDate("entry_date");
+                    Integer status = leaveApprovalFound.getInt("status");
+                    String refuse_reason = leaveApprovalFound.getString("refuse_reason");
+                    leaveApprovals.add(new LeaveApproval(form_num, student_ID, timestamp, reason, destination, leave_date, entry_date,
+                            status, refuse_reason));
+                }
+                con.close();
+                return leaveApprovals;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //根据班级和院系和审批状态查找过去n天的离校申请
+    public static ArrayList<LeaveApproval> getLeaveApprovals(String class_name, String faculty_name, Integer sta, int n) {
+        ArrayList<LeaveApproval> leaveApprovals = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findLeaveApprovalByClassFacultyandStatus;
+            if(sta != 4){
+                findLeaveApprovalByClassFacultyandStatus = con.prepareStatement(
+                        "select * from leave_approval, student " +
+                                "where student_ID=ID " +
+                                "and class_name = ? and faculty_name = ? and status = ? " +
+                                "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp);"
+                );
+                findLeaveApprovalByClassFacultyandStatus.setString(1, class_name);
+                findLeaveApprovalByClassFacultyandStatus.setString(2, faculty_name);
+                findLeaveApprovalByClassFacultyandStatus.setInt(3, sta);
+                findLeaveApprovalByClassFacultyandStatus.setInt(4, n-1);
+            }
+            else
+            {
+                findLeaveApprovalByClassFacultyandStatus = con.prepareStatement(
+                        "select * from leave_approval, student " +
+                                "where student_ID=ID " +
+                                "and class_name = ? and faculty_name = ? and (status=0 or status=1 or status=2) " +
+                                "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp);"
+                );
+                findLeaveApprovalByClassFacultyandStatus.setString(1, class_name);
+                findLeaveApprovalByClassFacultyandStatus.setString(2, faculty_name);
+                findLeaveApprovalByClassFacultyandStatus.setInt(3, n-1);
             }
             try (ResultSet leaveApprovalFound = findLeaveApprovalByClassFacultyandStatus.executeQuery())
             {

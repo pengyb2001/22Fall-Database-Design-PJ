@@ -58,7 +58,7 @@ public class Instructor {
             System.out.println("##指令“editEnterApproval”：审批入校申请");
             System.out.println("##指令“getDailyReportCount”：查询所在院系指定班级当日的健康日报填报人数");
             System.out.println("##指令“getEntryApprovalsToDo”：查询本班过去n天尚未批准的入校申请数量及详细信息");
-            System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
+            System.out.println("##指令“getLeaveApprovalsToDo”：查询本班过去n天尚未批准的离校申请数量及详细信息");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
@@ -97,9 +97,9 @@ public class Instructor {
             {
                 getEntryApprovalsToDo();
             }
-            else if (command.equals("list -o"))
+            else if (command.equals("getLeaveApprovalsToDo"))
             {
-                //listO();
+                getLeaveApprovalsToDo();
             }
             else if (command.equals("passGate"))
             {
@@ -487,6 +487,7 @@ public class Instructor {
         }
         else
         {
+            System.out.printf("##过去%d天待审批的入校申请数量为：%d\n", n, enterApprovals.size());
             System.out.printf("##过去%d天待审批的入校申请如下：\n", n);
             for (EnterApproval enterApproval: enterApprovals)
             {
@@ -494,6 +495,46 @@ public class Instructor {
                 System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n",
                         enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
                         enterApproval.getLived_area(), enterApproval.getEntry_date().toString());
+            }
+            System.out.println("##----------");
+        }
+    }
+
+    public void getLeaveApprovalsToDo()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要查询过去几天的未审批离校申请");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<LeaveApproval> leaveApprovals = new ArrayList<>();
+        leaveApprovals = LeaveApprovalUtil.getLeaveApprovals(getClassName(),getFacultyName(),0, n);
+        if (leaveApprovals.isEmpty())
+        {
+            System.out.println("##无待审批的离校申请！");
+            return;
+        }
+        else
+        {
+            System.out.printf("##过去%d天待审批的入校申请数量为：%d\n", n, leaveApprovals.size());
+            System.out.printf("##过去%d天待审批的离校申请如下：\n", n);
+            for (LeaveApproval leaveApproval: leaveApprovals)
+            {
+                System.out.println("##----------");
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n目的地：%s\n离校日期：%s\n返校日期：%s\n",
+                        leaveApproval.getForm_num(), leaveApproval.getStudent_ID(), leaveApproval.getTimestamp().toString(), leaveApproval.getReason(),
+                        leaveApproval.getDestination(),leaveApproval.getLeave_date().toString(), leaveApproval.getEntry_date().toString());
             }
             System.out.println("##----------");
         }

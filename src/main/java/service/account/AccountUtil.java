@@ -380,6 +380,51 @@ public class AccountUtil
         return null;
     }
 
+    //获取本班所有不在校但具有进校权限的学生
+    public static ArrayList<Student> outSchoolInAuthorityStudents(String className, String facultyName)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            // 查找用户名
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudent = con.prepareStatement("select distinct ID, name, phone, email, " +
+                    "personal_address, home_address, identity_type, id_num, in_school, class_name, faculty_name from " +
+                    "(select * from student where in_school = '不在校' and class_name = ? and faculty_name = ? ) as o " +
+                    "left join admission_authority aa on aa.student_ID = o.ID " +
+                    "where aa.campus_name is not null");
+            findStudent.setString(1, className);
+            findStudent.setString(2, facultyName);
+            try (ResultSet usersFound = findStudent.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    //以下部分变量可能为NULL
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
 
     
 

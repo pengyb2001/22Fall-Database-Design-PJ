@@ -85,7 +85,7 @@ public class Root {
                 case "Z校区":
                     invalid = false;
                     students = AuthorityUtil.getStudentsByCampusName(input);
-                    System.out.printf("##已完成%s的管控\n",input);
+                    break;
                 default:
                     System.out.println("##请输入正确的校区名！");
             }
@@ -118,6 +118,7 @@ public class Root {
                     invalid = false;
                     AuthorityUtil.deleteAuthorityByCampusName(input);
                     System.out.printf("##已完成%s的管控\n",input);
+                    break;
                 default:
                     System.out.println("##请输入正确的校区名！");
             }

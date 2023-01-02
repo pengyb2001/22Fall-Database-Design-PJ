@@ -1,7 +1,9 @@
 package model.account;
+import model.record.PassRecord;
 import model.report_sheet.DailyReport;
 import model.report_sheet.EnterApproval;
 import service.account.AccountUtil;
+import service.record.RecordUtil;
 import service.report_sheet.DailyReportUtil;
 import service.report_sheet.EnterApprovalUtil;
 import service.report_sheet.LeaveApprovalUtil;
@@ -58,7 +60,7 @@ public class Instructor {
             System.out.println("##指令“editEnterApproval”：审批入校申请");
             System.out.println("##指令“getDailyReportCount”：查询所在院系指定班级当日的健康日报填报人数");
             System.out.println("##指令“getEntryApprovalsToDo”：查询本班过去n天尚未批准的入校申请数量及详细信息");
-            System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
+            System.out.println("##指令“getOutSchoolStudents”：查询本班已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
@@ -97,9 +99,9 @@ public class Instructor {
             {
                 getEntryApprovalsToDo();
             }
-            else if (command.equals("list -o"))
+            else if (command.equals("getOutSchoolStudents"))
             {
-                //listO();
+                getOutSchoolStudents();
             }
             else if (command.equals("passGate"))
             {
@@ -497,5 +499,26 @@ public class Instructor {
             }
             System.out.println("##----------");
         }
+    }
+
+    //getOutSchoolStudents查询本班已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)
+    public void getOutSchoolStudents()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.outSchoolInAuthorityStudents(getClassName(), getFacultyName());
+        if (students.isEmpty())
+        {
+            System.out.println("没有具有进校权限但不在校的学生！");
+            return;
+        }
+        System.out.printf("##共%d名学生，学生名单如下：\n",students.size());
+        for (Student student: students)
+        {
+            PassRecord passRecord = RecordUtil.getNearestOutPassRecordByID(student.getID());
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n离校时间：%s\n",
+                    student.getID(), student.getName(), passRecord.getTimestamp().toString());
+        }
+        System.out.println("##----------");
     }
 }

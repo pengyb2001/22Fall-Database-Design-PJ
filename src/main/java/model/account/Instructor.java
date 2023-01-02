@@ -63,7 +63,7 @@ public class Instructor {
             System.out.println("##指令“getLeaveApprovalsToDo”：查询本班过去n天尚未批准的离校申请数量及详细信息");
             System.out.println("##指令“getInSchoolLeaveStudents”：查询本班已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##指令“getOutSchoolStudents”：查询本班已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
-            System.out.println("##指令“passGate”：进出校");
+            System.out.println("##指令“getLeaveStudents”：查询本班未提交出校申请但离校状态超过 24h 的学生数量、个人信息");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
@@ -109,8 +109,8 @@ public class Instructor {
             {
                 getOutSchoolStudents();
             }
-            else if (command.equals("passGate")){
-
+            else if (command.equals("getLeaveStudents")){
+                getLeaveStudents();
             }
             else if (command.equals("getInSchoolLeaveStudents"))
             {
@@ -579,6 +579,26 @@ public class Instructor {
         if (students.isEmpty())
         {
             System.out.println("本班没有已提交出校申请但未离校的学生！");
+            return;
+        }
+        System.out.printf("##共%d名学生，学生名单如下：\n",students.size());
+        for (Student student: students)
+        {
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n电话：%s\n",
+                    student.getID(), student.getName(), student.getPhone());
+        }
+        System.out.println("##----------");
+    }
+
+    //查询本班未提交出校申请但离校状态超过 24h 的学生数量、个人信息
+    public void getLeaveStudents()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.getLeaveStudents(getClassName(), getFacultyName());
+        if (students.isEmpty())
+        {
+            System.out.println("本班没有未提交出校申请但离校状态超过 24h 的学生！");
             return;
         }
         System.out.printf("##共%d名学生，学生名单如下：\n",students.size());

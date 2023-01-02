@@ -8,12 +8,15 @@ import model.account.FacultyAdmin;
 import model.account.Instructor;
 import model.account.Student;
 
+import model.record.PassRecord;
+import service.record.RecordUtil;
 import service.sql.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class AccountUtil
 {
@@ -369,6 +372,64 @@ public class AccountUtil
                     String faculty_name = usersFound.getString("faculty_name");
                     students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
                             id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+
+    }
+
+    //根据班级和院系获取未提交出校申请但离校超过24H的学生
+    //提交离校申请的，离校申请状态为0、1、2；对于离校刚审批通过的 通过有无入校权限来判断
+    public  static ArrayList<Student> getLeaveStudents(String classname, String faculty)
+    {
+        long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudent = con.prepareStatement(
+                    "select * " +
+                            "from student where (in_school = '不在校') and class_name=? and faculty_name=? " +
+                            "and not exists(select * from leave_approval where student_ID=student.ID " +
+                                            "and (status = 0 or status = 1 or status = 2)) " +
+                            "and ID in(select student_ID from admission_authority where student_ID=student.ID)"
+            );
+            findStudent.setString(1, classname);
+            findStudent.setString(2, faculty);
+
+            try (ResultSet usersFound = findStudent.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    PassRecord passRecord = RecordUtil.getNearestOutPassRecordByID(usersFound.getString("ID"));
+                    Date nowDate = new Date();
+                    boolean moreThanDay = Math.abs(nowDate.getTime() - passRecord.getTimestamp().getTime()) > MILLIS_PER_DAY;
+                    //离校超过24H才存入
+                    if(moreThanDay)
+                    {
+                        String ID = usersFound.getString("ID");
+                        String name = usersFound.getString("name");
+                        String phone = usersFound.getString("phone");
+                        String email = usersFound.getString("email");
+                        String personal_address = usersFound.getString("personal_address");
+                        String home_address = usersFound.getString("home_address");
+                        String identity_type = usersFound.getString("identity_type");
+                        String id_num = usersFound.getString("id_num");
+                        String in_school = usersFound.getString("in_school");
+                        String class_name = usersFound.getString("class_name");
+                        String faculty_name = usersFound.getString("faculty_name");
+                        students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                                id_num, in_school, class_name, faculty_name));
+                    }
+                    else break;
+
                 }
                 con.close();
                 return students;

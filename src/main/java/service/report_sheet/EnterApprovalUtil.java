@@ -149,6 +149,63 @@ public class EnterApprovalUtil {
         return null;
     }
 
+    //根据班级和院系和审批状态查找过去n天的入校申请
+    public static ArrayList<EnterApproval> getEnterApprovals(String class_name, String faculty_name, Integer sta, int n) {
+        ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findEnterApprovalByClassFacultyandStatus;
+            if(sta != 4){
+                findEnterApprovalByClassFacultyandStatus = con.prepareStatement(
+                        "select * from enter_approval, student " +
+                                "where student_ID=ID " +
+                                "and class_name = ? and faculty_name = ? and status = ? " +
+                                "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp);"
+                );
+                findEnterApprovalByClassFacultyandStatus.setString(1, class_name);
+                findEnterApprovalByClassFacultyandStatus.setString(2, faculty_name);
+                findEnterApprovalByClassFacultyandStatus.setInt(3, sta);
+                findEnterApprovalByClassFacultyandStatus.setInt(4, n-1);
+            }
+            else
+            {
+                findEnterApprovalByClassFacultyandStatus = con.prepareStatement(
+                        "select * from enter_approval, student " +
+                                "where student_ID=ID " +
+                                "and class_name = ? and faculty_name = ? and (status=0 or status=1 or status=2) " +
+                                "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp);"
+                );
+                findEnterApprovalByClassFacultyandStatus.setString(1, class_name);
+                findEnterApprovalByClassFacultyandStatus.setString(2, faculty_name);
+                findEnterApprovalByClassFacultyandStatus.setInt(3, n-1);
+            }
+            try (ResultSet enterApprovalFound = findEnterApprovalByClassFacultyandStatus.executeQuery())
+            {
+                while (enterApprovalFound.next())
+                {
+                    Integer form_num = enterApprovalFound.getInt("form_num");
+                    String student_ID = enterApprovalFound.getString("student_ID");
+                    Date timestamp = enterApprovalFound.getDate("timestamp");
+                    String reason = enterApprovalFound.getString("reason");
+                    String lived_area = enterApprovalFound.getString("lived_area");
+                    Date entry_date = enterApprovalFound.getDate("entry_date");
+                    Integer status = enterApprovalFound.getInt("status");
+                    String refuse_reason = enterApprovalFound.getString("refuse_reason");
+                    enterApprovals.add(new EnterApproval(form_num, student_ID, timestamp, reason, lived_area, entry_date,
+                            status, refuse_reason));
+                }
+                con.close();
+                return enterApprovals;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
     //根据院系和审批状态查找入校申请
     public static ArrayList<EnterApproval> getEnterApprovals_1(String faculty_name, Integer sta) {
         ArrayList<EnterApproval> enterApprovals = new ArrayList<>();

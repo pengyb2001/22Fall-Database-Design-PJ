@@ -57,7 +57,7 @@ public class Instructor {
             System.out.println("##指令“getMyEnterApprovals”：查询入校申请");
             System.out.println("##指令“editEnterApproval”：审批入校申请");
             System.out.println("##指令“getDailyReportCount”：查询所在院系指定班级当日的健康日报填报人数");
-            System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
+            System.out.println("##指令“getEntryApprovalsToDo”：查询本班过去n天尚未批准的入校申请数量及详细信息");
             System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
@@ -93,9 +93,9 @@ public class Instructor {
             {
                 getDailyReportCount();
             }
-            else if (command.equals("getMyDailyReport"))
+            else if (command.equals("getEntryApprovalsToDo"))
             {
-                //getMyDailyReport();
+                getEntryApprovalsToDo();
             }
             else if (command.equals("list -o"))
             {
@@ -357,7 +357,7 @@ public class Instructor {
         }
         else
         {
-            System.out.println("##待审批的离校申请如下：");
+            System.out.println("##待审批的入校申请如下：");
             System.out.println("##要进行审批，请记下对应学号");
             for (EnterApproval enterApproval: enterApprovals)
             {
@@ -458,5 +458,44 @@ public class Instructor {
         System.out.printf("##%s%s今天填写了健康日报的人数为：%d\n",getFacultyName(), classname, cnt);
         System.out.println("##----------");
 
+    }
+
+    public void getEntryApprovalsToDo()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要查询过去几天的未审批入校申请");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<EnterApproval> enterApprovals = new ArrayList<>();
+        enterApprovals = EnterApprovalUtil.getEnterApprovals(getClassName(),getFacultyName(),0, n);
+        if (enterApprovals.isEmpty())
+        {
+            System.out.println("##无待审批的入校申请！");
+            return;
+        }
+        else
+        {
+            System.out.printf("##过去%d天待审批的入校申请如下：\n", n);
+            for (EnterApproval enterApproval: enterApprovals)
+            {
+                System.out.println("##----------");
+                System.out.printf("表单号：%d\n学号：%s\n申请时间：%s\n申请理由：%s\n七天内经过地区：%s\n返校日期：%s\n",
+                        enterApproval.getForm_num(), enterApproval.getStudent_ID(), enterApproval.getTimestamp().toString(), enterApproval.getReason(),
+                        enterApproval.getLived_area(), enterApproval.getEntry_date().toString());
+            }
+            System.out.println("##----------");
+        }
     }
 }

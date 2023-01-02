@@ -1,12 +1,14 @@
 package service.record;
 
 import model.account.Instructor;
+import model.account.Student;
 import model.record.PassRecord;
 import service.sql.SQLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class RecordUtil {
@@ -71,6 +73,134 @@ public class RecordUtil {
                 }
                 con.close();
                 return campusMaxVisit;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //查询全校过去n天一直在校未曾出校的学生
+    public static ArrayList<Student> getInSchoolStudent(int n)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudents = con.prepareStatement("select * from student " +
+                    "where (in_school!='不在校') " +
+                    "and not exists (select * from pass_record where student_ID=student.ID and type='0' " +
+                    "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp))");
+            findStudents.setInt(1, n);
+            try(ResultSet usersFound = findStudents.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //按院系查询过去n天一直在校未曾出校的学生
+    public static ArrayList<Student> getInSchoolStudent(String faculty, int n)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudents = con.prepareStatement("select * from student " +
+                    "where (in_school!='不在校') " +
+                    "and not exists (select * from pass_record where student_ID=student.ID and type='0' " +
+                    "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp)) " +
+                    "and faculty_name=?");
+            findStudents.setInt(1, n);
+            findStudents.setString(2, faculty);
+            try(ResultSet usersFound = findStudents.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //按班级查询过去n天一直在校未曾出校的学生
+    public static ArrayList<Student> getInSchoolStudent(String classname, String faculty, int n)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudents = con.prepareStatement("select * from student " +
+                    "where (in_school!='不在校') " +
+                    "and not exists (select * from pass_record where student_ID=student.ID and type='0' " +
+                    "and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp)) " +
+                    "and faculty_name=? and class_name=?");
+            findStudents.setInt(1, n);
+            findStudents.setString(2, faculty);
+            findStudents.setString(3, classname);
+            try(ResultSet usersFound = findStudents.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
             }
         }
         catch (Exception e)

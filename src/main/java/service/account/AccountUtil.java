@@ -307,6 +307,31 @@ public class AccountUtil
         return null;
     }
 
+    //通过院系管理员表判断输入的院系是否存在
+    public static boolean facultyExists(String faculty)
+    {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findFaculty;
+            findFaculty = con.prepareStatement("select * from faculty_administrator where " +
+                    "faculty_name=?");
+            findFaculty.setString(1, faculty);
+            try(ResultSet instructorFond = findFaculty.executeQuery())
+            {
+                if(instructorFond.next())
+                {
+                    return true;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return false;
+    }
+
     //获取已提交出校申请但未离校的学生
     public static ArrayList<Student> getInSchoolLeaveStudents(String classname, String faculty)
     {

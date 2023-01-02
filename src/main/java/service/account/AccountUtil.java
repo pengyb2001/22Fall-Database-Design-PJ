@@ -278,6 +278,13 @@ public class AccountUtil
         }
         return null;
     }
+
+    //获取已提交出校申请但未离校的学生
+    public static ArrayList<Student> getStudent_1(String classname, String faculty)
+    {
+//        ArrayList
+        return null;
+    }
     //获取所有学生
     public static ArrayList<Student> listStudent()
     {

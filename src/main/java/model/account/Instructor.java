@@ -59,7 +59,7 @@ public class Instructor {
             System.out.println("##指令“getDailyReportCount”：查询所在院系指定班级当日的健康日报填报人数");
             System.out.println("##指令“getEntryApprovalsToDo”：查询本班过去n天尚未批准的入校申请数量及详细信息");
             System.out.println("##指令“getLeaveApprovalsToDo”：查询本班过去n天尚未批准的离校申请数量及详细信息");
-            System.out.println("##指令“passGate”：进出校");
+            System.out.println("##指令“getStudent_1”：查询本班已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
@@ -101,10 +101,9 @@ public class Instructor {
             {
                 getLeaveApprovalsToDo();
             }
-            else if (command.equals("passGate"))
+            else if (command.equals("getStudent_1"))
             {
-                //add();
-                //passGate();
+                getStudent_1();
             }
             else if (command.equals("addDailyReport"))
             {
@@ -538,5 +537,11 @@ public class Instructor {
             }
             System.out.println("##----------");
         }
+    }
+
+    public void getStudent_1()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.getStudent_1(getClassName(), getFacultyName());
     }
 }

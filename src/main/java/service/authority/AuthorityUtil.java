@@ -1,5 +1,6 @@
 package service.authority;
 
+import model.account.Student;
 import model.admission_authority.AdmissionAuthority;
 import service.sql.SQLUtil;
 
@@ -96,5 +97,44 @@ public class AuthorityUtil {
         {
             SQLUtil.handleExceptions(e);
         }
+    }
+
+    //根据校区返回能有权限进入的学生列表
+    public static ArrayList<Student> getStudentsByCampusName(String campusName)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudentsByCampusName = con.prepareStatement("select * from student, admission_authority where student.ID = admission_authority.student_ID and campus_name=?");
+            findStudentsByCampusName.setString(1, campusName);
+            try (ResultSet studentsFound = findStudentsByCampusName.executeQuery())
+            {
+                while (studentsFound.next())
+                {
+                    String ID = studentsFound.getString("ID");
+                    String name = studentsFound.getString("name");
+                    String phone = studentsFound.getString("phone");
+                    String email = studentsFound.getString("email");
+                    String personal_address = studentsFound.getString("personal_address");
+                    String home_address = studentsFound.getString("home_address");
+                    String identity_type = studentsFound.getString("identity_type");
+                    String id_num = studentsFound.getString("id_num");
+                    String in_school = studentsFound.getString("in_school");
+                    String class_name = studentsFound.getString("class_name");
+                    String faculty_name = studentsFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+            }
+            con.close();
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+
+        return students;
     }
 }

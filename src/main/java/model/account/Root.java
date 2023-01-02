@@ -1,5 +1,6 @@
 package model.account;
 
+import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
 import service.record.RecordUtil;
 
@@ -38,7 +39,7 @@ public class Root {
             String command = scanner.nextLine();
             if (command.equals("list"))
             {
-                //list();
+                list();
             }
             else if (command.equals("getStudentsByCampusName"))
             {
@@ -65,6 +66,41 @@ public class Root {
                 System.out.println("##【root账户权限操作】无此指令，请重新输入。");
             }
         }
+    }
+
+    public void list()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        ArrayList<Instructor> instructors = new ArrayList<>();
+        ArrayList<FacultyAdmin> facultyAdmins = new ArrayList<>();
+        students = AccountUtil.listStudent();
+        instructors = AccountUtil.listInstructor();
+        facultyAdmins = AccountUtil.listFacultyAdmin();
+        System.out.printf("##学生有%d个，名单如下：\n",students.size());
+        for (Student student: students)
+        {
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n班级：%s\n院系：%s\n",
+                    student.getID(), student.getName(), student.getClassName(), student.getFacultyName());
+        }
+        System.out.println("##----------");
+        System.out.printf("##辅导员有%d个，名单如下：\n",instructors.size());
+        for (Instructor instructor: instructors)
+        {
+            System.out.println("##----------");
+            System.out.printf("工号：%s\n姓名：%s\n班级：%s\n院系：%s\n",
+                    instructor.getID(), instructor.getName(), instructor.getClassName(), instructor.getFacultyName());
+        }
+        System.out.println("##----------");
+        System.out.printf("##院系管理员有%d个，名单如下：\n",facultyAdmins.size());
+        for (FacultyAdmin facultyAdmin: facultyAdmins)
+        {
+            System.out.println("##----------");
+            System.out.printf("工号：%s\n姓名：%s\n院系：%s\n",
+                    facultyAdmin.getID(), facultyAdmin.getName(), facultyAdmin.getFacultyName());
+        }
+        System.out.println("##----------");
+
     }
 
     public void getStudentsByCampusName()

@@ -64,7 +64,6 @@ public class Instructor {
             System.out.println("##指令“getInSchoolLeaveStudents”：查询本班已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##指令“getOutSchoolStudents”：查询本班已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
             System.out.println("##指令“getLeaveStudents”：查询本班未提交出校申请但离校状态超过 24h 的学生数量、个人信息");
-            System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
             System.out.println("##指令“logout”：注销");
@@ -115,11 +114,6 @@ public class Instructor {
             else if (command.equals("getInSchoolLeaveStudents"))
             {
                 getInSchoolLeaveStudents();
-            }
-            else if (command.equals("addDailyReport"))
-            {
-                //add();
-                //addDailyReport();
             }
             else if (command.equals("addLeaveApproval"))
             {
@@ -610,4 +604,5 @@ public class Instructor {
         }
         System.out.println("##----------");
     }
+
 }

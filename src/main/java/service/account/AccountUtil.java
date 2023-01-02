@@ -249,6 +249,31 @@ public class AccountUtil
         return null;
     }
 
+    //通过辅导员表获得所有院系的列表
+    public static ArrayList<String> getAllFaculty()
+    {
+        ArrayList<String> allFaculties = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findAllFaculty = con.prepareStatement("select distinct faculty_name from instructor");
+            try(ResultSet allFacultyFound = findAllFaculty.executeQuery())
+            {
+                while (allFacultyFound.next())
+                {
+                    allFaculties.add(allFacultyFound.getString("faculty_name"));
+                }
+                con.close();
+                return allFaculties;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
     public static boolean instructorExists(String classname, String faculty) {
         return getInstructorByClassAndFaculty(classname, faculty) != null;
     }

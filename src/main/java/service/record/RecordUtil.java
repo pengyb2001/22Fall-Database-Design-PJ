@@ -45,4 +45,38 @@ public class RecordUtil {
         }
         return null;
     }
+
+    //根据院系获得过去n天该院系学生进出最多的校区
+    public static String getCampusMaxVisitByFaculty(String faculty, int n)
+    {
+        String campusMaxVisit = "该段时间没有进出校记录";
+        try
+        {
+            Connection con =SQLUtil.getConnection();
+            PreparedStatement getCampusMaxVisitByFaculty = con.prepareStatement(
+                    "select campus_name, count(*) as cnt " +
+                            "from student join pass_record on (student.ID = pass_record.student_ID) " +
+                            "where faculty_name = ? and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp) " +
+                            "group by campus_name " +
+                            "order by cnt desc"
+            );
+            getCampusMaxVisitByFaculty.setString(1, faculty);
+            getCampusMaxVisitByFaculty.setInt(2, n);
+            try(ResultSet maxFound = getCampusMaxVisitByFaculty.executeQuery())
+            {
+                //记录出入校记录最多的校区
+                if(maxFound.next())
+                {
+                    campusMaxVisit = maxFound.getString("campus_name");
+                }
+                con.close();
+                return campusMaxVisit;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
 }

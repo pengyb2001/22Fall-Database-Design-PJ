@@ -31,6 +31,7 @@ public class Root {
             System.out.println("##【root账户权限操作】指令“getStudentsByCampusName”：根据校区查询所有具有该权限的学生数量和名单");
             System.out.println("##【root账户权限操作】指令“manageAdmission”：按校区更改所有学生进入的权限(在该校区除外)");
             System.out.println("##【root账户权限操作】指令“getInSchoolLeaveStudents”：查询全校已提交出校申请但未离校的学生数量、个人信息；");
+            System.out.println("##【root账户权限操作】指令“getCampusMaxVisit”：过去n天每个院系学生产生最多出入校记录的校区");
             System.out.println("##【root账户权限操作】指令“logout”：注销");
             System.out.println("##【root账户权限操作】指令“exit”：退出系统");
             System.out.println("##【root账户权限操作】==========");
@@ -52,6 +53,10 @@ public class Root {
             else if (command.equals("getInSchoolLeaveStudents"))
             {
                 getInSchoolLeaveStudents();
+            }
+            else if (command.equals("getCampusMaxVisit"))
+            {
+                getCampusMaxVisit();
             }
             else if (command.equals("logout"))
             {
@@ -178,6 +183,35 @@ public class Root {
                     student.getID(), student.getName(), student.getPhone(), student.getClassName(), student.getFacultyName());
         }
         System.out.println("##----------");
+    }
+
+    //过去 n 天每个院系学生产生最多出入校记录的校区(格式为 [院系名]：[校区名])
+    public void getCampusMaxVisit()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入查询限定范围为过去几天");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<String> allFaculties = new ArrayList<>();
+        allFaculties = AccountUtil.getAllFaculty();
+        for(String faculty: allFaculties)
+        {
+            System.out.printf("%s学生最近%d天出入校记录最多的校区为：%s\n",
+                    faculty, n, RecordUtil.getCampusMaxVisitByFaculty(faculty, n));
+
+        }
     }
 
 }

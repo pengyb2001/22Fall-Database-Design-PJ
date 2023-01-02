@@ -278,7 +278,101 @@ public class AccountUtil
         }
         return null;
     }
-    
+    //获取所有学生
+    public static ArrayList<Student> listStudent()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            // 查找用户名
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudent = con.prepareStatement("select * from student");
+            try (ResultSet usersFound = findStudent.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+    //获取所有辅导员
+    public static ArrayList<Instructor> listInstructor()
+    {
+        ArrayList<Instructor> instructors = new ArrayList<>();
+        try
+        {
+            // 查找用户名
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findInstructor = con.prepareStatement("select * from instructor");
+            try (ResultSet usersFound = findInstructor.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    instructors.add(new Instructor(ID, name, class_name, faculty_name));
+                }
+                con.close();
+                return instructors;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+    //获取所有院系管理员
+    public static ArrayList<FacultyAdmin> listFacultyAdmin()
+    {
+        ArrayList<FacultyAdmin> facultyAdmins = new ArrayList<>();
+        try
+        {
+            // 查找用户名
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findFacultyAdmin = con.prepareStatement("select * from faculty_administrator");
+            try (ResultSet usersFound = findFacultyAdmin.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    facultyAdmins.add(new FacultyAdmin(ID, name, faculty_name));
+                }
+                con.close();
+                return facultyAdmins;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
 
     
 

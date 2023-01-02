@@ -2,6 +2,7 @@ package model.account;
 import model.report_sheet.DailyReport;
 import model.report_sheet.EnterApproval;
 import service.account.AccountUtil;
+import service.report_sheet.DailyReportUtil;
 import service.report_sheet.EnterApprovalUtil;
 import service.report_sheet.LeaveApprovalUtil;
 import model.report_sheet.LeaveApproval;
@@ -55,7 +56,7 @@ public class Instructor {
             System.out.println("##指令“editLeaveApproval”：审批离校申请");
             System.out.println("##指令“getMyEnterApprovals”：查询入校申请");
             System.out.println("##指令“editEnterApproval”：审批入校申请");
-            System.out.println("##指令“getDailyReportCount”：查询当日班级填报人数");//TODO
+            System.out.println("##指令“getDailyReportCount”：查询所在院系指定班级当日的健康日报填报人数");
             System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
             System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
             System.out.println("##指令“passGate”：进出校");
@@ -88,9 +89,9 @@ public class Instructor {
             {
                 editEnterApproval();
             }
-            else if (command.equals("list -r"))
+            else if (command.equals("getDailyReportCount"))
             {
-                //listR();
+                getDailyReportCount();
             }
             else if (command.equals("getMyDailyReport"))
             {
@@ -428,5 +429,34 @@ public class Instructor {
         {
             System.out.println("该学生没有待审批的入校申请！");
         }
+    }
+
+    public void getDailyReportCount()
+    {
+        int isClassExists = 0;
+        String classname = getClassName();
+        do
+        {
+            System.out.print("##请输入你所在的院系要查询的班级：\n");
+            System.out.print(">");
+            Scanner scanner = new Scanner(System.in);
+            classname = scanner.nextLine();
+            if(AccountUtil.instructorExists(classname, getFacultyName())){
+                isClassExists = 1;
+            }
+            else
+            {
+                System.out.println("##您所在的院系没有该班级");
+            }
+        }while (isClassExists == 0);
+        int cnt = 0;
+        int total = 0;
+        total = AccountUtil.getCountByClass(classname, getFacultyName());
+        System.out.println("##----------");
+        System.out.printf("##%s%s人数为：%d\n",getFacultyName(), classname, total);
+        cnt = DailyReportUtil.getTodayCountByClass(classname, getFacultyName());
+        System.out.printf("##%s%s今天填写了健康日报的人数为：%d\n",getFacultyName(), classname, cnt);
+        System.out.println("##----------");
+
     }
 }

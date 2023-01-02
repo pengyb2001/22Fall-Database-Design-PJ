@@ -117,7 +117,7 @@ public class Student {
             System.out.println("##学生可以进行以下操作：");
             System.out.println("##指令“getInfo”：查看自己的个人信息");
             System.out.println("##指令“getAuthority”：查看自己的入校权限");
-            System.out.println("##指令“getDailyReportCount”：查询当日班级健康日报填报人数");//TODO
+            System.out.println("##指令“getDailyReportCount”：查询当日班级健康日报填报人数");
             System.out.println("##指令“getMyDailyReport”：查看过去n天日报");
             System.out.println("##指令“getMyLeaveApproval”：查询当前离校审批进度");
             System.out.println("##指令“getMyEnterApproval”：查询当前入校审批进度");

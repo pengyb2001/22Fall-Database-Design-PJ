@@ -36,22 +36,8 @@ public class AccountUtil
     }
 
 
-    
-//    public static User getUser(String username, String password)
-//    {
-//        User user = getUser(username);
-//        // 检查密码是否正确
-//        if (user != null && user.getPassword().equals(password))
-//        {
-//            return user;
-//        }
-//        else
-//        {
-//            return null;
-//        }
-//    }
-public static ArrayList<Student> getClassList(String className, String facultyName)
-{
+    public static ArrayList<Student> getClassList(String className, String facultyName)
+    {
     ArrayList<Student> students = new ArrayList<>();
     try
     {
@@ -259,6 +245,39 @@ public static ArrayList<Student> getClassList(String className, String facultyNa
         }
         return null;
     }
+
+    public static boolean instructorExists(String classname, String faculty) {
+        return getInstructorByClassAndFaculty(classname, faculty) != null;
+    }
+
+    public static Instructor getInstructorByClassAndFaculty(String classname, String faculty) {
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findInstructorByClassAndFaculty;
+            findInstructorByClassAndFaculty = con.prepareStatement("select * from instructor where " +
+                    "class_name=? and faculty_name=?");
+            findInstructorByClassAndFaculty.setString(1, classname);
+            findInstructorByClassAndFaculty.setString(2, faculty);
+            try(ResultSet instructorFond = findInstructorByClassAndFaculty.executeQuery())
+            {
+                if(instructorFond.next())
+                {
+                    String ID = instructorFond.getString("ID");
+                    String name = instructorFond.getString("name");
+                    String class_name = instructorFond.getString("class_name");
+                    String faculty_name = instructorFond.getString("faculty_name");
+                    con.close();
+                    return new Instructor(ID, name, class_name, faculty_name);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
     //获取所有学生
     public static ArrayList<Student> listStudent()
     {
@@ -353,7 +372,7 @@ public static ArrayList<Student> getClassList(String className, String facultyNa
         }
         return null;
     }
-    
+
 
     
 

@@ -280,10 +280,57 @@ public class AccountUtil
     }
 
     //获取已提交出校申请但未离校的学生
-    public static ArrayList<Student> getStudent_1(String classname, String faculty)
+    public static ArrayList<Student> getInSchoolLeaveStudents(String classname, String faculty)
     {
-//        ArrayList
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudent = con.prepareStatement(
+                    "(select student.* " +
+                            "from student, leave_approval " +
+                            "where ID=student_ID and (in_school != '不在校') and (status = 0 or status = 1 or status = 2)" +
+                            "and class_name=? and faculty_name=?) " +
+                            "union " +
+                            "(select * " +
+                            "from student " +
+                            "where (in_school != '不在校') and class_name=? and faculty_name=? " +
+                            "and not exists(select * from admission_authority " +
+                            "where admission_authority.student_ID=student.ID))"
+            );
+            findStudent.setString(1, classname);
+            findStudent.setString(2, faculty);
+            findStudent.setString(3, classname);
+            findStudent.setString(4, faculty);
+
+            try (ResultSet usersFound = findStudent.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
         return null;
+
     }
     //获取所有学生
     public static ArrayList<Student> listStudent()

@@ -61,7 +61,7 @@ public class Instructor {
             System.out.println("##指令“getDailyReportCount”：查询所在院系指定班级当日的健康日报填报人数");
             System.out.println("##指令“getEntryApprovalsToDo”：查询本班过去n天尚未批准的入校申请数量及详细信息");
             System.out.println("##指令“getLeaveApprovalsToDo”：查询本班过去n天尚未批准的离校申请数量及详细信息");
-            System.out.println("##指令“getStudent_1”：查询本班已提交出校申请但未离校的学生数量、个人信息；");
+            System.out.println("##指令“getInSchoolLeaveStudents”：查询本班已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##指令“getOutSchoolStudents”：查询本班已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
             System.out.println("##指令“passGate”：进出校");
             System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
@@ -112,9 +112,9 @@ public class Instructor {
             else if (command.equals("passGate")){
 
             }
-            else if (command.equals("getStudent_1"))
+            else if (command.equals("getInSchoolLeaveStudents"))
             {
-                getStudent_1();
+                getInSchoolLeaveStudents();
             }
             else if (command.equals("addDailyReport"))
             {
@@ -529,7 +529,7 @@ public class Instructor {
             }
         }while(n == 0);
         ArrayList<LeaveApproval> leaveApprovals = new ArrayList<>();
-        leaveApprovals = LeaveApprovalUtil.getLeaveApprovals(getClassName(),getFacultyName(),0, n);
+        leaveApprovals = LeaveApprovalUtil.getLeaveApprovals_1(getClassName(),getFacultyName(),0, n);
         if (leaveApprovals.isEmpty())
         {
             System.out.println("##无待审批的离校申请！");
@@ -571,9 +571,23 @@ public class Instructor {
         System.out.println("##----------");
     }
 
-    public void getStudent_1()
+    //查询本班已提交出校申请但未离校的学生数量、个人信息
+    public void getInSchoolLeaveStudents()
     {
         ArrayList<Student> students = new ArrayList<>();
-        students = AccountUtil.getStudent_1(getClassName(), getFacultyName());
+        students = AccountUtil.getInSchoolLeaveStudents(getClassName(), getFacultyName());
+        if (students.isEmpty())
+        {
+            System.out.println("本班没有已提交出校申请但未离校的学生！");
+            return;
+        }
+        System.out.printf("##共%d名学生，学生名单如下：\n",students.size());
+        for (Student student: students)
+        {
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n电话：%s\n",
+                    student.getID(), student.getName(), student.getPhone());
+        }
+        System.out.println("##----------");
     }
 }

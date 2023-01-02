@@ -175,7 +175,7 @@ public class LeaveApprovalUtil {
     }
 
     //根据班级和院系和审批状态查找过去n天的离校申请
-    public static ArrayList<LeaveApproval> getLeaveApprovals(String class_name, String faculty_name, Integer sta, int n) {
+    public static ArrayList<LeaveApproval> getLeaveApprovals_1(String class_name, String faculty_name, Integer sta, int n) {
         ArrayList<LeaveApproval> leaveApprovals = new ArrayList<>();
         try
         {

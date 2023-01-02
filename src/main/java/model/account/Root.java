@@ -30,7 +30,7 @@ public class Root {
             System.out.println("##【root账户权限操作】指令“list”：列出所有用户（不包括root）");
             System.out.println("##【root账户权限操作】指令“getStudentsByCampusName”：根据校区查询所有具有该权限的学生数量和名单");
             System.out.println("##【root账户权限操作】指令“manageAdmission”：按校区更改所有学生进入的权限(在该校区除外)");
-            System.out.println("##【root账户权限操作】指令“delete”：删除已有用户");
+            System.out.println("##【root账户权限操作】指令“getInSchoolLeaveStudents”：查询全校已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##【root账户权限操作】指令“logout”：注销");
             System.out.println("##【root账户权限操作】指令“exit”：退出系统");
             System.out.println("##【root账户权限操作】==========");
@@ -49,9 +49,9 @@ public class Root {
             {
                 manageAdmission();
             }
-            else if (command.equals("delete"))
+            else if (command.equals("getInSchoolLeaveStudents"))
             {
-                //delete();
+                getInSchoolLeaveStudents();
             }
             else if (command.equals("logout"))
             {
@@ -160,4 +160,24 @@ public class Root {
             }
         }while(invalid);
     }
+
+    public void getInSchoolLeaveStudents()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        students = AccountUtil.getInSchoolLeaveStudents();
+        if (students.isEmpty())
+        {
+            System.out.println("全校没有已提交出校申请但未离校的学生！");
+            return;
+        }
+        System.out.printf("##共%d名学生，学生名单如下：\n",students.size());
+        for (Student student: students)
+        {
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n电话：%s\n班级：%s\n院系：%s\n",
+                    student.getID(), student.getName(), student.getPhone(), student.getClassName(), student.getFacultyName());
+        }
+        System.out.println("##----------");
+    }
+
 }

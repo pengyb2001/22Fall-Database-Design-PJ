@@ -332,6 +332,55 @@ public class AccountUtil
         return null;
 
     }
+
+    //获取全校已提交出校申请但未离校的学生
+    public static ArrayList<Student> getInSchoolLeaveStudents()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudent = con.prepareStatement(
+                    "(select student.* " +
+                            "from student, leave_approval " +
+                            "where ID=student_ID and (in_school != '不在校') and (status = 0 or status = 1 or status = 2)) " +
+                            "union " +
+                            "(select * " +
+                            "from student " +
+                            "where (in_school != '不在校') " +
+                            "and not exists(select * from admission_authority " +
+                            "where admission_authority.student_ID=student.ID))"
+            );
+
+            try (ResultSet usersFound = findStudent.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+
+    }
     //获取所有学生
     public static ArrayList<Student> listStudent()
     {

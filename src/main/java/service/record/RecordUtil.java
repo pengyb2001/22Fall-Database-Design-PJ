@@ -221,7 +221,7 @@ public class RecordUtil {
             Connection con = SQLUtil.getConnection();
             PreparedStatement findPassRecordsByID;
             findPassRecordsByID = con.prepareStatement("select * from pass_record where " +
-                    "student_ID=? and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp) " +
+                    "student_ID=? and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(timestamp) " +
                     "order by pass_num desc ");
             findPassRecordsByID.setString(1, studentID);
             try(ResultSet passRecordFound = findPassRecordsByID.executeQuery())

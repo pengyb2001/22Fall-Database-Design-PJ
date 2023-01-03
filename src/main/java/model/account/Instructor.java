@@ -11,6 +11,7 @@ import model.report_sheet.LeaveApproval;
 import model.account.Student;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 import static service.report_sheet.LeaveApprovalUtil.dateChange;
@@ -63,6 +64,7 @@ public class Instructor {
             System.out.println("##指令“getLeaveApprovalsToDo”：查询本班过去n天尚未批准的离校申请数量及详细信息");
             System.out.println("##指令“getInSchoolLeaveStudents”：查询本班已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##指令“getOutSchoolStudents”：查询本班已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
+            System.out.println("##指令“getOutSchoolTime”：查询本班学生（从当天算起）过去一年的离校总时长");
             System.out.println("##指令“getLeaveStudents”：查询本班未提交出校申请但离校状态超过 24h 的学生数量、个人信息");
             System.out.println("##指令“addLeaveApproval”：新增离校申请");
             System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
@@ -107,6 +109,10 @@ public class Instructor {
             else if (command.equals("getOutSchoolStudents"))
             {
                 getOutSchoolStudents();
+            }
+            else if (command.equals("getOutSchoolTime"))
+            {
+                getOutSchoolTime();
             }
             else if (command.equals("getLeaveStudents")){
                 getLeaveStudents();
@@ -610,6 +616,36 @@ public class Instructor {
             System.out.printf("学号：%s\n姓名：%s\n电话：%s\n",
                     student.getID(), student.getName(), student.getPhone());
         }
+        System.out.println("##----------");
+    }
+
+    //查询本班学生过去一年的离校总时长
+    public void getOutSchoolTime()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要查询的学生学号");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = 1;
+            }
+            else
+            {
+                System.out.println("##请输入正确的学号！");
+            }
+        }while(n == 0);
+        Student student = AccountUtil.getMyStudent(input, getClassName(),getFacultyName());
+        if (student == null)
+        {
+            System.out.println("本班没有该学号的学生！");
+            return;
+        }
+        String date = RecordUtil.getOutSchoolTime(input, student.getInSchool());
+        System.out.printf("##该学生过去一年离校时长：%s\n",date);
         System.out.println("##----------");
     }
 

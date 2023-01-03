@@ -52,12 +52,6 @@ public class FacultyAdmin {
             System.out.println("##指令“editLeaveApproval”：审批本院系离校申请");
             System.out.println("##指令“getMyEnterApprovals”：按状态查询本院系入校申请");
             System.out.println("##指令“editEnterApproval”：审批本院系入校申请");
-            System.out.println("##指令“getMyDailyReport”：查看过去14天日报");
-            System.out.println("##指令“list -o”：查看当前区域病床对应的患者信息");
-            System.out.println("##指令“passGate”：进出校");
-            System.out.println("##指令“addDailyReport”：新增每日健康填报记录");
-            System.out.println("##指令“addLeaveApproval”：新增离校申请");
-            System.out.println("##指令“delete”：删除当前治疗区域的病房护士");
             System.out.println("##指令“logout”：注销");
             System.out.println("##指令“exit”：退出系统");
             System.out.println("##==========");
@@ -83,14 +77,6 @@ public class FacultyAdmin {
             else if (command.equals("editEnterApproval"))
             {
                 editEnterApproval();
-            }
-            else if (command.equals("getMyDailyReport"))
-            {
-                //getMyDailyReport();
-            }
-            else if (command.equals("list -o"))
-            {
-                //listO();
             }
 
             else if (command.equals("logout"))

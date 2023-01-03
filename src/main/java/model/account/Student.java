@@ -133,7 +133,6 @@ public class Student {
             String command = scanner.nextLine();
             if (command.equals("getInfo"))
             {
-                //listN();
                 getInfo();
             }
             else if (command.equals("getAuthority"))
@@ -158,12 +157,10 @@ public class Student {
             }
             else if (command.equals("passGate"))
             {
-                //add();
                 passGate();
             }
             else if (command.equals("addDailyReport"))
             {
-                //add();
                 addDailyReport();
             }
             else if (command.equals("addLeaveApproval"))
@@ -173,10 +170,6 @@ public class Student {
             else if (command.equals("addEnterApproval"))
             {
                 addEnterApproval();
-            }
-            else if (command.equals("delete"))
-            {
-                //delete();
             }
             else if (command.equals("logout"))
             {

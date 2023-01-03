@@ -1,5 +1,6 @@
 package model.account;
 
+import model.record.AvgOutTime;
 import model.record.PassRecord;
 import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
@@ -10,6 +11,7 @@ import service.report_sheet.EnterApprovalUtil;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 public class Root {
@@ -38,10 +40,10 @@ public class Root {
             System.out.println("##【root账户权限操作】指令“getOutSchoolStudents”：查询全校已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
             System.out.println("##【root账户权限操作】指令“getInSchoolLeaveStudents”：查询全校已提交出校申请但未离校的学生数量、个人信息；");
             System.out.println("##【root账户权限操作】指令“getCampusMaxVisit”：过去n天各院系学生产生最多出入校记录的校区");
-            System.out.println("##【root账户权限操作】指令“getInSchoolStudent”：查询过去n天一直在校未曾出校的学生支持按多级范围（全校、院系、班级）");
-            System.out.println("##【root账户权限操作】指令“getMaxEnterApproval”：查询前n个提交入校申请最多的学生，支持按多级范围（全校、院系、班级）进行筛选");
+            System.out.println("##【root账户权限操作】指令“getInSchoolStudent”：查询过去n天一直在校未曾出校的学生 支持按多级范围（全校、院系、班级）");
+            System.out.println("##【root账户权限操作】指令“getMaxEnterApproval”：查询前n个提交入校申请最多的学生 支持按多级范围（全校、院系、班级）进行筛选");
             System.out.println("##【root账户权限操作】指令“getContinuous”：查询全校连续 n 天填写“健康日报”时间（精确到分钟）完全一致的学生数量，个人信息");
-
+            System.out.println("##【root账户权限操作】指令“getAvgLeave”：查询前 n 个平均离校时间最长的学生 支持按多级范围（全校、院系、班级）");
             System.out.println("##【root账户权限操作】指令“logout”：注销");
             System.out.println("##【root账户权限操作】指令“exit”：退出系统");
             System.out.println("##【root账户权限操作】==========");
@@ -83,6 +85,10 @@ public class Root {
             else if (command.equals("getContinuous"))
             {
                 getContinuous();
+            }
+            else if (command.equals("getAvgLeave"))
+            {
+                getAvgLeave();
             }
             else if (command.equals("logout"))
             {
@@ -501,4 +507,114 @@ public class Root {
 
     }
 
+    //查询前 n 个平均离校时间最长的学生 支持按多级范围（全校、院系、班级）
+    public void getAvgLeave()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要查询前几个平均离校时间最长的学生");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<AvgOutTime> avgOutTimes = new ArrayList<>();
+        ArrayList<Student> students = new ArrayList<>();
+        String faculty;
+        String classname;
+        boolean invalid = true;
+        do
+        {
+            System.out.println("##全校查询请输1，按院系查询请输2，按班级查询请输3");
+            System.out.print(">");
+            scanner = new Scanner(System.in);
+            input = scanner.nextLine();
+            switch (input){
+                case "1":
+                    students = AccountUtil.listStudent();
+                    for(Student student:students)
+                    {
+                        AvgOutTime getNew = RecordUtil.getOutSchoolTimeAvg(student.getID(), student.getInSchool());
+                        avgOutTimes.add(getNew);
+                    }
+                    invalid = false;
+                    break;
+                case "2":
+                    do{
+                        System.out.println("##请输入查询院系的名称");
+                        System.out.print(">");
+                        faculty = scanner.nextLine();
+                        if(AccountUtil.facultyExists(faculty))
+                        {
+                            students = AccountUtil.getFacultyList(faculty);
+                            for(Student student:students)
+                            {
+                                AvgOutTime getNew = RecordUtil.getOutSchoolTimeAvg(student.getID(), student.getInSchool());
+                                avgOutTimes.add(getNew);
+                            }
+                        }
+                        else
+                        {
+                            System.out.println("##请输入正确的院系名称！");
+                        }
+                    }while(!AccountUtil.facultyExists(faculty));
+                    invalid = false;
+                    break;
+                case "3":
+                    do{
+                        System.out.println("##请输入班级所在院系的名称");
+                        System.out.print(">");
+                        faculty = scanner.nextLine();
+                        if(!AccountUtil.facultyExists(faculty))
+                        {
+                            System.out.println("##请输入正确的院系名称！");
+                        }
+                    }while(!AccountUtil.facultyExists(faculty));
+                    do{
+                        System.out.println("##请输入班级的名称");
+                        System.out.print(">");
+                        classname = scanner.nextLine();
+                        if(!AccountUtil.instructorExists(classname, faculty))
+                        {
+                            System.out.println("##请输入正确的班级名称！");
+                        }
+                    }while(!AccountUtil.instructorExists(classname, faculty));
+                    students = AccountUtil.getClassList(classname, faculty);
+                    for(Student student:students)
+                    {
+                        AvgOutTime getNew = RecordUtil.getOutSchoolTimeAvg(student.getID(), student.getInSchool());
+                        avgOutTimes.add(getNew);
+                    }
+                    invalid = false;
+                    break;
+                default:
+                    System.out.println("##输入的数字错误，请重试");
+            }
+        }while (invalid);
+        Collections.sort(avgOutTimes);
+        System.out.printf("##平均离校时长最长的前%d位的学生如下\n",n);
+        if (avgOutTimes.isEmpty()){
+            System.out.println("##无记录！");
+            return;
+        }
+        int j=1;
+        for(AvgOutTime avgOutTime: avgOutTimes)
+        {
+            if (j>n) break;
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n平均离校时长：%s\n",
+                    avgOutTime.getStudent_ID(),
+                    RecordUtil.secondToTime(avgOutTime.getAvgOutTime()));
+            j++;
+
+        }
+    }
 }

@@ -4,8 +4,11 @@ import model.record.PassRecord;
 import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
 import service.record.RecordUtil;
+import service.report_sheet.DailyReportUtil;
 import service.report_sheet.EnterApprovalUtil;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -37,6 +40,8 @@ public class Root {
             System.out.println("##【root账户权限操作】指令“getCampusMaxVisit”：过去n天各院系学生产生最多出入校记录的校区");
             System.out.println("##【root账户权限操作】指令“getInSchoolStudent”：查询过去n天一直在校未曾出校的学生支持按多级范围（全校、院系、班级）");
             System.out.println("##【root账户权限操作】指令“getMaxEnterApproval”：查询前n个提交入校申请最多的学生，支持按多级范围（全校、院系、班级）进行筛选");
+            System.out.println("##【root账户权限操作】指令“getContinuous”：查询全校连续 n 天填写“健康日报”时间（精确到分钟）完全一致的学生数量，个人信息");
+
             System.out.println("##【root账户权限操作】指令“logout”：注销");
             System.out.println("##【root账户权限操作】指令“exit”：退出系统");
             System.out.println("##【root账户权限操作】==========");
@@ -74,6 +79,10 @@ public class Root {
             else if (command.equals("getMaxEnterApproval"))
             {
                 getMaxEnterApproval();
+            }
+            else if (command.equals("getContinuous"))
+            {
+                getContinuous();
             }
             else if (command.equals("logout"))
             {
@@ -450,6 +459,46 @@ public class Root {
 
         }
         System.out.println("##----------");
+    }
+
+    //查询全校连续 n 天填写“健康日报”时间（精确到分钟）完全一致的学生数量，个人信息
+    public void getContinuous()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入要查询连续几天的");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<ContinuousStudent> students = new ArrayList<>();
+        DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        students = DailyReportUtil.getContinunous(n);
+
+        if (students.isEmpty()){
+            System.out.println("##无记录！");
+            return;
+        }
+        System.out.printf("##连续%d天填报时间相同的学生有%d位，信息如下\n", n, students.size());
+        for (ContinuousStudent student: students)
+        {
+            Student studentInfo = AccountUtil.getStudent(student.getStudent_ID());
+            System.out.println("##----------");
+            System.out.printf("学号：%s\n姓名：%s\n电话：%s\n班级：%s\n院系：%s\n连续填报的开始时间：%s\n",
+                    studentInfo.getID(), studentInfo.getName(), studentInfo.getPhone(), studentInfo.getClassName(),
+                    studentInfo.getFacultyName(), sdf.format(student.getStart_day()));
+        }
+        System.out.println("##----------");
+
     }
 
 }

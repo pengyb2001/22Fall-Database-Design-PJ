@@ -1,5 +1,6 @@
 package service.report_sheet;
 
+import model.account.ContinuousStudent;
 import model.report_sheet.DailyReport;
 import service.sql.SQLUtil;
 
@@ -118,6 +119,53 @@ public class DailyReportUtil {
                 }
                 con.close();
                 return dailyReports;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //查询全校连续 n 天填写“健康日报”时间（精确到分钟）完全一致的学生
+    public static ArrayList<ContinuousStudent> getContinunous(int n)
+    {
+        ArrayList<ContinuousStudent> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findStudent = con.prepareStatement(
+                    "with temp1 as\n" +
+                            "	(select student_ID, timestamp, date_format(date_sub(timestamp, INTERVAL rn*24*60 MINUTE), '%Y-%m-%d %H:%i') as dis,row_number() over (order by student_ID )rowNum\n" +
+                            "	from \n" +
+                            "		(\n" +
+                            "		select \n" +
+                            "		student_ID, timestamp, row_number() over (partition by student_ID order by timestamp asc)rn\n" +
+                            "		from daily_report\n" +
+                            "		)t1\n" +
+                            "	)\n" +
+                            "	select distinct student_ID, day_count,date_add(dis, INTERVAL 1 DAY) as start_day from(\n" +
+                            "		select student_ID, count(*)day_count, dis from(	\n" +
+                            "			select student_ID, dis, row_number()over(partition by dis order by rowNum) as orde1, rowNum, rowNum-row_number()over(partition by dis order by rowNum) as orde2\n" +
+                            "			from temp1\n" +
+                            "			ORDER BY rowNum\n" +
+                            "			)as w\n" +
+                            "		group by dis,orde2,student_ID\n" +
+                            "		)as s where day_count = ?"
+            );
+            findStudent.setInt(1, n);
+            try(ResultSet usersFound = findStudent.executeQuery())
+            {
+                while (usersFound.next())
+                {
+                    String student_ID = usersFound.getString("student_ID");
+                    int day_count = usersFound.getInt("day_count");
+                    Date start_day = new java.util.Date(usersFound.getTimestamp("start_day").getTime());
+                    students.add(new ContinuousStudent(student_ID, day_count, start_day));
+                }
+                con.close();
+                return students;
             }
         }
         catch (Exception e)

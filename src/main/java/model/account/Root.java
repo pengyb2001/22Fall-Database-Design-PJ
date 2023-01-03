@@ -4,6 +4,7 @@ import model.record.PassRecord;
 import service.account.AccountUtil;
 import service.authority.AuthorityUtil;
 import service.record.RecordUtil;
+import service.report_sheet.EnterApprovalUtil;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -33,8 +34,9 @@ public class Root {
             System.out.println("##【root账户权限操作】指令“manageAdmission”：按校区更改所有学生进入的权限(在该校区除外)");
             System.out.println("##【root账户权限操作】指令“getOutSchoolStudents”：查询全校已出校但尚未返回校园（即离校状态）的学生数量、个人信息及各自的离校时间(学生状态不在校但具有进校权限)");
             System.out.println("##【root账户权限操作】指令“getInSchoolLeaveStudents”：查询全校已提交出校申请但未离校的学生数量、个人信息；");
-            System.out.println("##【root账户权限操作】指令“getCampusMaxVisit”：过去n天每个院系学生产生最多出入校记录的校区");
+            System.out.println("##【root账户权限操作】指令“getCampusMaxVisit”：过去n天各院系学生产生最多出入校记录的校区");
             System.out.println("##【root账户权限操作】指令“getInSchoolStudent”：查询过去n天一直在校未曾出校的学生支持按多级范围（全校、院系、班级）");
+            System.out.println("##【root账户权限操作】指令“getMaxEnterApproval”：查询前n个提交入校申请最多的学生，支持按多级范围（全校、院系、班级）进行筛选");
             System.out.println("##【root账户权限操作】指令“logout”：注销");
             System.out.println("##【root账户权限操作】指令“exit”：退出系统");
             System.out.println("##【root账户权限操作】==========");
@@ -68,6 +70,10 @@ public class Root {
             else if (command.equals("getInSchoolStudent"))
             {
                 getInSchoolStudent();
+            }
+            else if (command.equals("getMaxEnterApproval"))
+            {
+                getMaxEnterApproval();
             }
             else if (command.equals("logout"))
             {
@@ -225,7 +231,7 @@ public class Root {
         System.out.println("##----------");
     }
 
-    //过去 n 天每个院系学生产生最多出入校记录的校区(格式为 [院系名]：[校区名])
+    //过去n天每个院系学生产生最多出入校记录的校区(格式为 [院系名]：[校区名])
     public void getCampusMaxVisit()
     {
         Scanner scanner = new Scanner(System.in);
@@ -341,6 +347,107 @@ public class Root {
             System.out.println("##----------");
             System.out.printf("学号：%s\n姓名：%s\n电话：%s\n所在校区：%s\n班级：%s\n院系：%s\n",
                     student.getID(), student.getName(), student.getPhone(), student.getInSchool(), student.getClassName(), student.getFacultyName());
+        }
+        System.out.println("##----------");
+    }
+
+    //查询前n个提交入校申请最多的学生，支持按多级范围（全校、院系、班级）进行筛选
+    public void getMaxEnterApproval()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int n = 0;
+        do{
+            System.out.println("##请输入查询前几位入校申请最多的学生");
+            System.out.print(">");
+            input = scanner.nextLine();
+            if(Student.isNumeric(input))
+            {
+                n = Integer.parseInt(input);
+            }
+            else
+            {
+                System.out.println("##请输入数字！");
+            }
+        }while(n == 0);
+        ArrayList<Student> students = new ArrayList<>();
+        String faculty;
+        String classname;
+        boolean invalid = true;
+        do
+        {
+            System.out.println("##全校查询请输1，按院系查询请输2，按班级查询请输3");
+            System.out.print(">");
+            scanner = new Scanner(System.in);
+            input = scanner.nextLine();
+            switch (input){
+                case "1":
+                    students = EnterApprovalUtil.getMaxEnterApproval();
+                    invalid = false;
+                    break;
+                case "2":
+                    do{
+                        System.out.println("##请输入查询院系的名称");
+                        System.out.print(">");
+                        faculty = scanner.nextLine();
+                        if(AccountUtil.facultyExists(faculty))
+                        {
+                            students = EnterApprovalUtil.getMaxEnterApproval(faculty);
+                        }
+                        else
+                        {
+                            System.out.println("##请输入正确的院系名称！");
+                        }
+                    }while(!AccountUtil.facultyExists(faculty));
+                    invalid = false;
+                    break;
+                case "3":
+                    do{
+                        System.out.println("##请输入班级所在院系的名称");
+                        System.out.print(">");
+                        faculty = scanner.nextLine();
+                        if(!AccountUtil.facultyExists(faculty))
+                        {
+                            System.out.println("##请输入正确的院系名称！");
+                        }
+                    }while(!AccountUtil.facultyExists(faculty));
+                    do{
+                        System.out.println("##请输入班级的名称");
+                        System.out.print(">");
+                        classname = scanner.nextLine();
+                        if(!AccountUtil.instructorExists(classname, faculty))
+                        {
+                            System.out.println("##请输入正确的班级名称！");
+                        }
+                    }while(!AccountUtil.instructorExists(classname, faculty));
+                    students = EnterApprovalUtil.getMaxEnterApproval(classname, faculty);
+                    invalid = false;
+                    break;
+                default:
+                    System.out.println("##输入的数字错误，请重试");
+            }
+        }while (invalid);
+        System.out.printf("##提交入校申请最多的前%d位的学生如下\n",n);
+        if (students.isEmpty()){
+            System.out.println("##无记录！");
+            return;
+        }
+        int j = 0;
+        int max = 0;
+        for(Student student:students)
+        {
+            j++;
+            int count = EnterApprovalUtil.getCount(student.getID());
+            if((j <= n) || (count == max))
+            {
+                System.out.println("##----------");
+                System.out.printf("学号：%s\n姓名：%s\n班级：%s\n院系：%s\n提交入校申请次数：%d\n",
+                        student.getID(), student.getName(), student.getClassName(), student.getFacultyName(),
+                        count);
+                max = count;
+            }
+            else break;
+
         }
         System.out.println("##----------");
     }

@@ -1,5 +1,6 @@
 package service.report_sheet;
 
+import model.account.Student;
 import model.report_sheet.EnterApproval;
 import model.report_sheet.LeaveApproval;
 import service.sql.SQLUtil;
@@ -283,7 +284,7 @@ public class EnterApprovalUtil {
         }
     }
 
-    //撤销离校申请
+    //撤销入校申请
     public static void deleteEnterApproval(Integer form_num)
     {
         try
@@ -299,5 +300,156 @@ public class EnterApprovalUtil {
         {
             SQLUtil.handleExceptions(e);
         }
+    }
+
+    //根据学号查询入校申请次数
+    public static int getCount(String id)
+    {
+        int count = 0;
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findCount = con.prepareStatement("select count(*) as cnt from enter_approval " +
+                    "where student_ID=?");
+            findCount.setString(1, id);
+            try(ResultSet countFound = findCount.executeQuery()){
+                while (countFound.next())
+                {
+                    count = countFound.getInt("cnt");
+                }
+                con.close();
+                return count;
+            }
+
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return 0;
+    }
+    //查询前n个提交入校申请最多的学生
+    public static ArrayList<Student> getMaxEnterApproval()
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findMaxEnterApproval = con.prepareStatement("select student.*, count(*) as cnt " +
+                    "from student right join enter_approval ea on student.ID = ea.student_ID " +
+                    "group by student.ID " +
+                    "order by cnt desc");
+            try(ResultSet usersFound = findMaxEnterApproval.executeQuery())
+            {
+                while(usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //按院系查询前n个提交入校申请最多的学生
+    public static ArrayList<Student> getMaxEnterApproval(String faculty)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findMaxEnterApproval = con.prepareStatement("select student.*, count(*) as cnt " +
+                    "from student right join enter_approval ea on student.ID = ea.student_ID " +
+                    "where faculty_name=?" +
+                    "group by student.ID " +
+                    "order by cnt desc");
+            findMaxEnterApproval.setString(1, faculty);
+            try(ResultSet usersFound = findMaxEnterApproval.executeQuery())
+            {
+                while(usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    //按班级查询前n个提交入校申请最多的学生
+    public static ArrayList<Student> getMaxEnterApproval(String classname, String faculty)
+    {
+        ArrayList<Student> students = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findMaxEnterApproval = con.prepareStatement("select student.*, count(*) as cnt " +
+                    "from student right join enter_approval ea on student.ID = ea.student_ID " +
+                    "where faculty_name=? and class_name=?" +
+                    "group by student.ID " +
+                    "order by cnt desc");
+            findMaxEnterApproval.setString(1, faculty);
+            findMaxEnterApproval.setString(2, classname);
+            try(ResultSet usersFound = findMaxEnterApproval.executeQuery())
+            {
+                while(usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    students.add(new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name));
+                }
+                con.close();
+                return students;
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
     }
 }

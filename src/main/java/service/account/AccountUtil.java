@@ -632,7 +632,7 @@ public class AccountUtil
         return null;
     }
 
-    //获取本班所有不在校但具有进校权限的学生
+    //获取所有不在校但具有进校权限的学生
     public static ArrayList<Student> outSchoolInAuthorityStudents()
     {
         ArrayList<Student> students = new ArrayList<>();

@@ -221,7 +221,7 @@ public class RecordUtil {
             Connection con = SQLUtil.getConnection();
             PreparedStatement findPassRecordsByID;
             findPassRecordsByID = con.prepareStatement("select * from pass_record where " +
-                    "student_ID=? " +
+                    "student_ID=? and DATE_SUB(CURDATE(), INTERVAL ? DAY) <= date(timestamp) " +
                     "order by pass_num desc ");
             findPassRecordsByID.setString(1, studentID);
             try(ResultSet passRecordFound = findPassRecordsByID.executeQuery())
@@ -238,16 +238,16 @@ public class RecordUtil {
                 }
             }
             con.close();
-            java.text.Format formatter=new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-            java.util.Date todayDate=new java.util.Date();
-
-            long beforeTime=(todayDate.getTime()/1000)-60*60*24*365;
-
-            Date yearbefore = todayDate;
-            yearbefore.setTime(beforeTime*1000);
-
-            String beforeDate=formatter.format(yearbefore);
+//            java.text.Format formatter=new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//
+//            java.util.Date todayDate=new java.util.Date();
+//
+//            long beforeTime=(todayDate.getTime()/1000)-60*60*24*365;
+//
+//            Date yearbefore = todayDate;
+//            yearbefore.setTime(beforeTime*1000);
+//
+//            String beforeDate=formatter.format(yearbefore);
 
             if (passRecords.isEmpty()) {
                 if (inSchool.equals("不在校"))
@@ -282,11 +282,11 @@ public class RecordUtil {
                         {
                             former_day = passRecords.get(0).getTimestamp();
                             passRecords.remove(0);
-                            if (passRecords.isEmpty())
-                            {
-                                plus_time = former_day.getTime() - yearbefore.getTime();
-                                sum_time += plus_time;
-                            }
+//                            if (passRecords.isEmpty())
+//                            {
+//                                plus_time = former_day.getTime() - yearbefore.getTime();
+//                                sum_time += plus_time;
+//                            }
                         }
                     }
                     return secondToTime(sum_time);
@@ -296,10 +296,10 @@ public class RecordUtil {
                     long sum_time = 0;
                     long plus_time = 0;
                     passRecords.remove(0);
-                    if (passRecords.isEmpty())
-                    {
-                        sum_time = former_day.getTime() - yearbefore.getTime();
-                    }
+//                    if (passRecords.isEmpty())
+//                    {
+//                        sum_time = former_day.getTime() - yearbefore.getTime();
+//                    }
                     while (!passRecords.isEmpty())
                     {
                         plus_time = former_day.getTime() - passRecords.get(0).getTimestamp().getTime();
@@ -312,11 +312,11 @@ public class RecordUtil {
                         {
                             former_day = passRecords.get(0).getTimestamp();
                             passRecords.remove(0);
-                            if (passRecords.isEmpty())
-                            {
-                                plus_time = former_day.getTime() - yearbefore.getTime();
-                                sum_time += plus_time;
-                            }
+//                            if (passRecords.isEmpty())
+//                            {
+//                                plus_time = former_day.getTime() - yearbefore.getTime();
+//                                sum_time += plus_time;
+//                            }
                         }
                     }
                     return secondToTime(sum_time);

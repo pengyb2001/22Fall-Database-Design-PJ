@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class RecordUtil {
@@ -18,6 +19,7 @@ public class RecordUtil {
         PassRecord.addRecord(student_ID,campus_name,type);
     }
 
+    //查询学生最近一次出校记录
     public static PassRecord getNearestOutPassRecordByID(String studentID)
     {
         try
@@ -209,4 +211,151 @@ public class RecordUtil {
         }
         return null;
     }
+
+    //计算学生过去一年离校总时长
+    public static String getOutSchoolTime(String studentID, String inSchool)
+    {
+        ArrayList<PassRecord> passRecords = new ArrayList<>();
+        try
+        {
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findPassRecordsByID;
+            findPassRecordsByID = con.prepareStatement("select * from pass_record where " +
+                    "student_ID=? " +
+                    "order by pass_num desc ");
+            findPassRecordsByID.setString(1, studentID);
+            try(ResultSet passRecordFound = findPassRecordsByID.executeQuery())
+            {
+                while (passRecordFound.next())
+                {
+                    Integer pass_num = passRecordFound.getInt("pass_num");
+                    String student_ID = passRecordFound.getString("student_ID");
+                    Date timestamp = passRecordFound.getTimestamp("timestamp");
+                    String campus_name = passRecordFound.getString("campus_name");
+                    Integer type = passRecordFound.getInt("type");
+
+                    passRecords.add(new PassRecord(pass_num, student_ID, timestamp, campus_name, type));
+                }
+            }
+            con.close();
+            java.text.Format formatter=new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            java.util.Date todayDate=new java.util.Date();
+
+            long beforeTime=(todayDate.getTime()/1000)-60*60*24*365;
+
+            Date yearbefore = todayDate;
+            yearbefore.setTime(beforeTime*1000);
+
+            String beforeDate=formatter.format(yearbefore);
+
+            if (passRecords.isEmpty()) {
+                if (inSchool.equals("不在校"))
+                {
+                    return "过去1年均不在校";
+                }else
+                {
+                    return "过去1年均在校";
+                }
+            }else
+            {
+                if (inSchool.equals("不在校"))
+                {
+                    Date former_day = new Date();
+                    long sum_time = 0;
+                    long plus_time = 0;
+                    while (!passRecords.isEmpty())
+                    {
+                        plus_time = former_day.getTime() - passRecords.get(0).getTimestamp().getTime();
+//                        System.out.printf("formerDay:%d\t%s\npassRecord:%d\t%s\n",
+//                                former_day.getTime(),secondToDate(former_day.getTime(),"yyyy-MM-dd HH:mm:ss"),
+//                                passRecords.get(0).getTimestamp().getTime(),
+//                                secondToDate(passRecords.get(0).getTimestamp().getTime(),"yyyy-MM-dd HH:mm:ss"));
+//                        System.out.printf("plusTime:%d\n",plus_time);
+                        sum_time += plus_time;
+                        //break;
+                        passRecords.remove(0);
+                        if (passRecords.isEmpty())
+                        {
+                            break;
+                        }else
+                        {
+                            former_day = passRecords.get(0).getTimestamp();
+                            passRecords.remove(0);
+                            if (passRecords.isEmpty())
+                            {
+                                plus_time = former_day.getTime() - yearbefore.getTime();
+                                sum_time += plus_time;
+                            }
+                        }
+                    }
+                    return secondToTime(sum_time);
+                }else
+                {
+                    Date former_day = passRecords.get(0).getTimestamp();
+                    long sum_time = 0;
+                    long plus_time = 0;
+                    passRecords.remove(0);
+                    if (passRecords.isEmpty())
+                    {
+                        sum_time = former_day.getTime() - yearbefore.getTime();
+                    }
+                    while (!passRecords.isEmpty())
+                    {
+                        plus_time = former_day.getTime() - passRecords.get(0).getTimestamp().getTime();
+                        sum_time += plus_time;
+                        passRecords.remove(0);
+                        if (passRecords.isEmpty())
+                        {
+                            break;
+                        }else
+                        {
+                            former_day = passRecords.get(0).getTimestamp();
+                            passRecords.remove(0);
+                            if (passRecords.isEmpty())
+                            {
+                                plus_time = former_day.getTime() - yearbefore.getTime();
+                                sum_time += plus_time;
+                            }
+                        }
+                    }
+                    return secondToTime(sum_time);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
+
+    public static String secondToTime(long millisecond)
+    {
+        long second = millisecond/1000;
+        long days = second / 86400;//转换天数
+        second = second % 86400;//剩余秒数
+
+        long hours = second / 3600;//转换小时数
+        second = second % 3600;//剩余秒数
+
+        long minutes = second / 60;//转换分钟
+        second = second % 60;//剩余秒数
+
+        if (0 < days){
+            return days + "天，"+hours+"小时，"+minutes+"分，"+second+"秒";
+        }else {
+            return hours+"小时，"+minutes+"分，"+second+"秒";
+        }
+
+    }
+    public static String secondToDate(long millisecond,String patten) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(millisecond);//转换为毫秒
+        Date date = calendar.getTime();
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(patten);
+        return format.format(date);
+    }
+
 }

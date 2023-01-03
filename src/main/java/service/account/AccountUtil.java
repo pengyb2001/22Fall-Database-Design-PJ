@@ -674,6 +674,50 @@ public class AccountUtil
         }
         return null;
     }
+    //根据学号和班级查询学生
+    public static Student getMyStudent(String student_ID, String className, String facultyName)
+    {
+
+        try
+        {
+            // 查找用户名
+            Connection con = SQLUtil.getConnection();
+            PreparedStatement findUserByUsername = con.prepareStatement("select * from student where ID=? and class_name=? and faculty_name=?");
+            findUserByUsername.setString(1, student_ID);
+            findUserByUsername.setString(2, className);
+            findUserByUsername.setString(3, facultyName);
+            try (ResultSet usersFound = findUserByUsername.executeQuery())
+            {
+                if (usersFound.next())
+                {
+                    String ID = usersFound.getString("ID");
+                    String name = usersFound.getString("name");
+                    String phone = usersFound.getString("phone");
+                    String email = usersFound.getString("email");
+                    String personal_address = usersFound.getString("personal_address");
+                    String home_address = usersFound.getString("home_address");
+                    String identity_type = usersFound.getString("identity_type");
+                    String id_num = usersFound.getString("id_num");
+                    String in_school = usersFound.getString("in_school");
+                    String class_name = usersFound.getString("class_name");
+                    String faculty_name = usersFound.getString("faculty_name");
+                    con.close();
+                    return new Student(ID, name, phone, email, personal_address, home_address, identity_type,
+                            id_num, in_school, class_name, faculty_name);
+                }
+                else
+                {
+                    con.close();
+                    return null;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            SQLUtil.handleExceptions(e);
+        }
+        return null;
+    }
 
 
     
